@@ -1,0 +1,16 @@
+MainPrgm L3ing;
+
+var  
+    let n, result: int; 
+
+beginpg
+    output "Entrez un nombre :";  
+    input n;
+
+    let result := 1;
+    for i from 1 to n step 1 {
+        let result := result * i;
+    }
+
+    output "Le factoriel de ", n, " est ", result;
+endpg;
