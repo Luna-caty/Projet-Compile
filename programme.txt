@@ -1,16 +1,10 @@
-MainPrgm L3ing;
+MainPrgm  L3_software ;
 
-var  
-    let n, result: int; 
+Var
 
-beginpg
-    output "Entrez un nombre :";  
-    input n;
+<!-Ceci est un commentaire sur une seule ligne!->
 
-    let result := 1;
-    for i from 1 to n step 1 {
-        let result := result * i;
-    }
-
-    output "Le factoriel de ", n, " est ", result;
-endpg;
+{--
+Ceci est un commentaire sur
+Plusieurs lignes
+--}

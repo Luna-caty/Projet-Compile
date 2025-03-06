@@ -1,71 +1,74 @@
 %{
     #include <stdio.h>
-    int nb_ligne = 1;
-    int col = 0;
+    #include "syntaxique.tab.h"
+    extern int nb_ligne = 1;
+    extern int col = 0;
     
     int yywrap(void) {
         return 1;
     }
 %}
 
-lettre [a-z]
+lettre [a-zA-Z]
 chiffre [0-9]
-IDF {lettre}({lettre}|{chiffre})*(_({lettre}|{chiffre})+)?
-cst {chiffre}+                           
-flt {chiffre}+"."{chiffre}+              
+IDF {lettre}({lettre}|{chiffre}|_)*
+constante [+-]?{chiffre}+                           
+float [+-]?{chiffre}+\.{chiffre}+
 chaine \"([^\"\\]|\\.)*\"                
-commentLigne "<!-"[^\n-].*?"-!>"
+commentLigne "<!-"[^!]*"!->"
 commentLignes "{--"(.|\n)*"--}"
 %%
+/* Mots-clé */
+"MainPrgm"  { return MainPrgm; }
+"Var"       { return Var; }
+"BeginPg"   { return BeginPg; }
+"EndPg"     { return EndPg; }
+"input"     { return input; }
+"output"    { return output; }
+"Int"       { return Int; }
+"Float"     { return Float; }
+"let"       { return let; }
+"if"        { return if; }
+"then"      { return then; }
+"else"      { return else; }
+"do"        { return do; }
+"while"     { return while; }
+"for"       { return for; }
+"from"      { return from; }
+"to"        { return to; }
+"step"      { return step; }
+"@define"   { return @define; }
+"Const"     { return Const; }
 
-"MainPrgm"  { printf(" Mot cle : Main Program \n"); }
-"var"       { printf(" Debut de la partie declaration \n"); }
-"Beginpg"   { printf(" Debut du programme \n"); }
-"Endpg"     { printf(" Fin du programme \n"); }
-"input"     { printf(" Instruction de lecture \n"); }
-"output"    { printf(" Instruction d'ecriture \n"); }
-"Int"       { printf(" Type entier \n"); }
-"float"     { printf(" Type flottant \n"); }
-"let"       { printf(" Declaration de variable \n"); }
-"if"        { printf(" Instruction conditionnelle if \n"); }
-"then"      { printf(" Instruction conditionnelle then \n"); }
-"else"      { printf(" Instruction conditionnelle else \n"); }
-"do"        { printf(" Boucle do-while \n"); }
-"while"     { printf(" Boucle while \n"); }
-"for"       { printf(" Boucle for \n"); }
-"from"     { printf(" Mot-cle 'from' dans une boucle \n"); }
-"to"        { printf(" Mot-cle 'to' dans une boucle \n"); }
-"step"      { printf(" Mot-cle 'step' (pas de boucle) \n"); }
-"@define"   { printf(" Definition de constante \n"); }
-"Const"     { printf(" Mot-cle 'Const' \n"); }
 
-
-":=" { printf(" Oprateur affectation \n"); }
-":"  { printf(" Separateur de declaration de type \n"); }
-";"  { printf(" Point-virgule \n"); }
-","  { printf(" Virgule \n"); }
-"+"  { printf(" Addition \n"); }
-"-"  { printf(" Soustraction \n"); }
-"*"  { printf(" Multiplication \n"); }
-"/"  { printf(" Division \n"); }
-"<=" { printf(" Inferieur ou égal \n"); }
-">=" { printf(" Superieur ou égal \n"); }
-"<"  { printf(" Inferieur \n"); }
-">"  { printf(" Superieur \n"); }
-"=="  { printf(" Operateur egalite \n"); }
-"!="  { printf(" Operateur NOT \n"); }
-"{"  { printf(" Accolade ouvrante \n"); }
-"}"  { printf(" Accolade fermante \n"); }
-"("  { printf(" Parenthese ouvrante \n"); }
-")"  { printf(" Parenthese fermante \n"); }
-"["  { printf(" Crochet ouvrant \n"); }
-"]"  { printf(" Crochet fermant \n"); }
+/* symboles et opérateurs */
+":=" {return aff;}
+":"  {return separ_dec; }
+";"  { return pvg; }
+","  { return vg }
+"+"  { return add; }
+"-"  { return sous; }
+"*"  { return mult; }
+"/"  { return div; }
+"<=" { return inf_egal; }
+">=" { return sup_egal; }
+"<"  {return inf; }
+">"  { return sup; }
+"=" { return aff_const; }
+"=="  { return egal; }
+"!="  { return not_egal; }
+"{"  { return acc_ouv; }
+"}"  { return acc_fer; }
+"("  { return par_ouv; }
+")"  { return par_fer; }
+"["  { return crochet_ouv; }
+"]"  { return crochet_fer; }
 "\"" { printf(" Guillemets \n"); }
 
-
-"and" { printf(" Operateur logique AND \n"); }
-"or"  { printf(" Operateur logique OR \n"); }
-"!"   { printf(" Operateur logique NOT \n"); }
+/* opérateurs logique */
+"AND" { return AND; }
+"OR"  { return OR; }
+"!"   { return not; }
 
 {IDF} { 
     if (yyleng <= 14)  
@@ -73,8 +76,8 @@ commentLignes "{--"(.|\n)*"--}"
     else  
         printf("Erreur lexicale : IDF trop long\n");  
 }
-{cst} { printf(" Constante entiere : %s \n", yytext); }
-{flt} { printf(" Constante flottante : %s \n", yytext); }
+{constante} { printf(" Constante entiere : %s \n", yytext); }
+{float} { printf(" Constante flottante : %s \n", yytext); }
 {chaine} { printf(" Chaine de caracteres : %s \n", yytext); }
 
 
@@ -95,3 +98,4 @@ int main ()
     yylex();
     return 0;
 }
+
