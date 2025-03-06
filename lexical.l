@@ -1,24 +1,30 @@
 %{
     #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
     #include "syntaxique.tab.h"
-    extern int nb_ligne = 1;
-    extern int col = 0;
-    
+
+    extern int nb_ligne;
+    extern int col;
+
     int yywrap(void) {
         return 1;
     }
 %}
 
+
 lettre [a-zA-Z]
 chiffre [0-9]
 IDF {lettre}({lettre}|{chiffre}|_)*
-constante [+-]?{chiffre}+                           
+constante [+-]?{chiffre}+
 float [+-]?{chiffre}+\.{chiffre}+
-chaine \"([^\"\\]|\\.)*\"                
+chaine \"([^\"\\]|\\.)*\"
 commentLigne "<!-"[^!]*"!->"
 commentLignes "{--"(.|\n)*"--}"
+
 %%
-/* Mots-clé */
+
+/* Mots-clés */
 "MainPrgm"  { return MainPrgm; }
 "Var"       { return Var; }
 "BeginPg"   { return BeginPg; }
@@ -37,65 +43,62 @@ commentLignes "{--"(.|\n)*"--}"
 "from"      { return from; }
 "to"        { return to; }
 "step"      { return step; }
-"@define"   { return @define; }
+"@define"   { return define; }
 "Const"     { return Const; }
 
-
-/* symboles et opérateurs */
-":=" {return aff;}
-":"  {return separ_dec; }
+/* Symboles et opérateurs */
+":=" { return aff; }
+":"  { return separ_dec; }
 ";"  { return pvg; }
-","  { return vg }
+","  { return vg; }
 "+"  { return add; }
 "-"  { return sous; }
 "*"  { return mult; }
 "/"  { return div; }
 "<=" { return inf_egal; }
 ">=" { return sup_egal; }
-"<"  {return inf; }
+"<"  { return inf; }
 ">"  { return sup; }
-"=" { return aff_const; }
-"=="  { return egal; }
-"!="  { return not_egal; }
+"="  { return aff_const; }
+"==" { return egal; }
+"!=" { return not_egal; }
 "{"  { return acc_ouv; }
 "}"  { return acc_fer; }
 "("  { return par_ouv; }
 ")"  { return par_fer; }
 "["  { return crochet_ouv; }
 "]"  { return crochet_fer; }
-"\"" { printf(" Guillemets \n"); }
 
-/* opérateurs logique */
+/* Opérateurs logiques */
 "AND" { return AND; }
 "OR"  { return OR; }
-"!"   { return not; }
+"!"   { return NOT; }
 
 {IDF} { 
     if (yyleng <= 14)  
-        printf("IDF\n");  
+        yylval.chaine = strdup(yytext); 
     else  
-        printf("Erreur lexicale : IDF trop long\n");  
+        printf("Erreur lexicale : Identificateur trop long '%s' (ligne %d)\n", yytext, nb_ligne);
+    return IDF;
 }
-{constante} { printf(" Constante entiere : %s \n", yytext); }
-{float} { printf(" Constante flottante : %s \n", yytext); }
-{chaine} { printf(" Chaine de caracteres : %s \n", yytext); }
+{constante} { yylval.entier = atoi(yytext); return constante; }
+{float} { yylval.reel = atof(yytext); return Float; }
+{chaine} { yylval.chaine = strdup(yytext); return chaine; }
+{commentLigne}  { /* Ignorer les commentaires sur une ligne */ }
+{commentLignes} { /* Ignorer les commentaires multi-lignes */ }
 
+[ \t]  ;
 
-{commentLigne}  { printf(" Commentaire sur une seule ligne \n"); }
-{commentLignes} { printf(" Commentaire sur plusieurs lignes \n"); }
+\n { nb_ligne++; }
 
-
-[ \t]  ;  
-\n { nb_ligne++; }  
-
-
-. { printf("Erreur lexicale à la ligne %d: caractere inattendu '%s' \n", nb_ligne, yytext); }
+/* Gestion des erreurs lexicales */
+. { printf("Erreur lexicale à la ligne %d: caractère inattendu '%s'\n", nb_ligne, yytext); }
 
 %%
 
-int main ()
-{
+int main() {
     yylex();
+    free(yylval.chaine);
+
     return 0;
 }
-
