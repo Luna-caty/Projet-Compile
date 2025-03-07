@@ -4,8 +4,6 @@ int nb_ligne = 1;
 int col = 0;    
 %}
 
-
-
 /* Specificaton des types */
 %union {
     int entier;
@@ -13,8 +11,8 @@ int col = 0;
     char* chaine;
 }
 /* partie token */
-%token  <chaine> MainPrgm Var BeginPg EndPg input output   
-%token <chaine>IDF let @define
+%token <chaine> MainPrgm Var BeginPg EndPg input output   
+%token <chaine>IDF let @define chaine
 %token <entier> Int constante 
 %token <reel> Float
 %token <chaine> if then else do while for from to step 
@@ -26,8 +24,6 @@ int col = 0;
 %token <chaine> crochet_ouv crochet_fer
 
 
-
-
 /* specification des priorités */
 %left OR
 %left AND
@@ -35,3 +31,21 @@ int col = 0;
 %left '<' '>' '<=' '>=' '==' '!='
 %left '+' '-'
 %left '*' '/'
+/* L'axiome */
+%start prgm
+
+%%
+/* regle grammaire */
+prgm: MainPrgm IDF pvg Var BeginPg  acc_ouv acc_fer EndPg pvg
+{printf("Structure correcte\n");}
+    ;
+
+inOut:
+    input par_ouv IDF par_fer pvg
+    | output par_ouv chaine par_fer pvg
+
+affectation :
+    IDF aff constante pvg
+    | IDF aff_const constante pvg
+    | IDF aff_const Float pvg
+    | IDF aff_const chaine pvg
