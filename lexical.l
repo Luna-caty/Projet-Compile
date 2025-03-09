@@ -66,8 +66,7 @@ commentLignes "{--"(.|\n)*"--}"
 "}"  { return acc_fer; }
 "("  { return par_ouv; }
 ")"  { return par_fer; }
-"["  { return crochet_ouv; }
-"]"  { return crochet_fer; }
+
 
 
 "AND" { return AND; }
