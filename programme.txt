@@ -1,10 +1,29 @@
-MainPrgm  L3_software ;
+MainPrgm L3_software ;
 
 Var
+    let x : Int ;
+    let y, z : Float ;
+    let tab : [Int ; 10] ;
+    let mat, data : [Float ; 5] ;
 
-<!-Ceci est un commentaire sur une seule ligne!->
+BeginPg
+{
+    x = 5 ;
+    y = 3.14 ;
+    z = y + 2.5 ;
 
-{--
-Ceci est un commentaire sur
-Plusieurs lignes
---}
+    if (x > 2) then {
+        output (x) ;
+    } else {
+        output (z) ;
+    }
+
+    do {
+        x = x - 1 ;
+    } while (x > 0) ;
+
+    for i from 1 to 10 step 2 {
+        output (i) ;
+    }
+}
+EndPg ;

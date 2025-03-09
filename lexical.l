@@ -24,29 +24,29 @@ commentLignes "{--"(.|\n)*"--}"
 
 %%
 
-/* Mots-clés */
+
 "MainPrgm"  { return MainPrgm; }
 "Var"       { return Var; }
 "BeginPg"   { return BeginPg; }
 "EndPg"     { return EndPg; }
-"input"     { return input; }
-"output"    { return output; }
+"input"     { return input_var; }
+"output"    { return output_var; }
 "Int"       { return Int; }
 "Float"     { return Float; }
 "let"       { return let; }
-"if"        { return if; }
-"then"      { return then; }
-"else"      { return else; }
-"do"        { return do; }
-"while"     { return while; }
-"for"       { return for; }
-"from"      { return from; }
-"to"        { return to; }
-"step"      { return step; }
+"if"        { return IF; }
+"then"      { return THEN; }
+"else"      { return ELSE; }
+"do"        { return DO; }
+"while"     { return WHILE; }
+"for"       { return FOR; }
+"from"      { return FROM; }
+"to"        { return TO; }
+"step"      { return STEP; }
 "@define"   { return define; }
-"Const"     { return Const; }
+"Const"     { return constante; }
 
-/* Symboles et opérateurs */
+
 ":=" { return aff; }
 ":"  { return separ_dec; }
 ";"  { return pvg; }
@@ -54,7 +54,7 @@ commentLignes "{--"(.|\n)*"--}"
 "+"  { return add; }
 "-"  { return sous; }
 "*"  { return mult; }
-"/"  { return div; }
+"/"  { return division; }
 "<=" { return inf_egal; }
 ">=" { return sup_egal; }
 "<"  { return inf; }
@@ -69,7 +69,7 @@ commentLignes "{--"(.|\n)*"--}"
 "["  { return crochet_ouv; }
 "]"  { return crochet_fer; }
 
-/* Opérateurs logiques */
+
 "AND" { return AND; }
 "OR"  { return OR; }
 "!"   { return NOT; }
@@ -81,24 +81,20 @@ commentLignes "{--"(.|\n)*"--}"
         printf("Erreur lexicale : Identificateur trop long '%s' (ligne %d)\n", yytext, nb_ligne);
     return IDF;
 }
-{constante} { yylval.entier = atoi(yytext); return constante; }
+{constante} { yylval.entier = atoi(yytext);
+ if (yylval.entier < -32768 || yylval.entier > 32767) 
+    printf("Erreur lexicale : Constante entière hors limites '%s' (ligne %d)\n", yytext, nb_ligne);}
+
 {float} { yylval.reel = atof(yytext); return Float; }
 {chaine} { yylval.chaine = strdup(yytext); return chaine; }
-{commentLigne}  { /* Ignorer les commentaires sur une ligne */ }
-{commentLignes} { /* Ignorer les commentaires multi-lignes */ }
+{commentLigne}  {printf("Commentaire sur une seule ligne"); }
+{commentLignes} {printf("Commentaire sur plusieurs lignes");}
 
 [ \t]  ;
 
 \n { nb_ligne++; }
 
-/* Gestion des erreurs lexicales */
 . { printf("Erreur lexicale à la ligne %d: caractère inattendu '%s'\n", nb_ligne, yytext); }
 
 %%
 
-int main() {
-    yylex();
-    free(yylval.chaine);
-
-    return 0;
-}
