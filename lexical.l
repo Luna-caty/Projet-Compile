@@ -4,8 +4,8 @@
     #include <string.h>
     #include "syntaxique.tab.h"
 
-    extern int nb_ligne;
-    extern int col;
+     int nb_ligne=1;
+     int col=0;
 
     int yywrap(void) {
         return 1;
@@ -32,7 +32,7 @@ commentLignes "{--"(.|\n)*"--}"
 "input"     { return input_var; }
 "output"    { return output_var; }
 "Int"       { return Int; }
-"Float"     { return Float; }
+"Float"     { return reel; }
 "let"       { return let; }
 "if"        { return IF; }
 "then"      { return THEN; }
@@ -43,11 +43,13 @@ commentLignes "{--"(.|\n)*"--}"
 "from"      { return FROM; }
 "to"        { return TO; }
 "step"      { return STEP; }
-"@define"   { return define; }
+"define"   { return define; }
+"@"        { return at_sign; }
 "Const"     { return constante; }
 
 
 ":=" { return aff; }
+"="  { return affect_val; }
 ":"  { return separ_dec; }
 ";"  { return pvg; }
 ","  { return vg; }
@@ -59,13 +61,14 @@ commentLignes "{--"(.|\n)*"--}"
 ">=" { return sup_egal; }
 "<"  { return inf; }
 ">"  { return sup; }
-"="  { return aff_const; }
 "==" { return egal; }
 "!=" { return not_egal; }
 "{"  { return acc_ouv; }
 "}"  { return acc_fer; }
 "("  { return par_ouv; }
 ")"  { return par_fer; }
+"["  { return crochet_ouv; }
+"]"  { return crochet_fer; }
 
 
 
@@ -82,9 +85,10 @@ commentLignes "{--"(.|\n)*"--}"
 }
 {constante} { yylval.entier = atoi(yytext);
  if (yylval.entier < -32768 || yylval.entier > 32767) 
-    printf("Erreur lexicale : Constante entière hors limites '%s' (ligne %d)\n", yytext, nb_ligne);}
+    printf("Erreur lexicale : Constante entière hors limites '%s' (ligne %d)\n", yytext, nb_ligne);
+    return constante; }
 
-{float} { yylval.reel = atof(yytext); return Float; }
+{float} { yylval.reel = atof(yytext); return reel; }
 {chaine} { yylval.chaine = strdup(yytext); return chaine; }
 {commentLigne}  {printf("Commentaire sur une seule ligne"); }
 {commentLignes} {printf("Commentaire sur plusieurs lignes");}

@@ -1,13 +1,13 @@
 %{
 #include <stdio.h>
-int nb_ligne = 1;
-int col = 0;  
+extern int nb_ligne;
+extern int col;
 extern int yylex();  
 void yyerror(const char *msg);
 int yywrap();
 %}
 
-/* Specificaton des types */
+/* Specification des types */
 %union {
     int entier;
     float reel;
@@ -15,12 +15,12 @@ int yywrap();
 }
 /* partie token */
 %token <chaine> MainPrgm Var BeginPg EndPg input_var output_var Const  
-%token <chaine>IDF let define chaine
+%token <chaine>IDF let define at_sign chaine 
 %token <entier> Int constante
-%token <reel> Float
+%token <reel> reel
 %token <chaine> IF THEN ELSE DO WHILE FOR FROM TO STEP
-%token <chaine> OR  AND NOT
-%token <chaine> aff aff_const pvg vg separ_dec add sous mult division   
+%token <chaine> OR AND NOT
+%token <chaine> aff affect_val pvg vg separ_dec add sous mult division   
 %token <chaine> inf_egal sup_egal inf sup egal not_egal
 %token <chaine> acc_ouv acc_fer
 %token <chaine> par_ouv par_fer
@@ -39,7 +39,7 @@ int yywrap();
 
 %%
 /* regle grammaire */
-programme: MainPrgm IDF pvg Var declarations BeginPg  acc_ouv instructions acc_fer EndPg pvg
+programme: MainPrgm IDF pvg Var declarations BeginPg acc_ouv instructions acc_fer EndPg pvg
 {printf("Structure correcte\n");}
     ;
 
@@ -51,7 +51,7 @@ instruction:
   | boucle
 ;
 
-op_cmp :
+op_cmp:
     inf_egal
     | sup_egal
     | inf
@@ -65,8 +65,8 @@ op_cmp :
 /* instructions -> instruction pvg | instructions instruction pvg */
 
 instructions:
-    instruction pvg
-  | instructions instruction pvg
+    instruction
+  | instructions instruction
 ;
 
 /* c'est pour les expressions conditionelles et logique 
@@ -76,61 +76,79 @@ comparaison entre deux variables
  */
 
 expression:
-    IDF op_cmp constante
-  | IDF op_cmp IDF
-  | expression AND expression
-  | expression OR expression
-  | NOT expression
-  | expression add expression
-  | expression sous expression
-  | expression mult expression
-  | expression division expression
+    IDF
+    | constante
+    | reel
+    | chaine
+    | IDF crochet_ouv expression crochet_fer  /* pour les tableaux */
+    | expression op_cmp expression
+    | par_ouv expression AND expression par_fer
+    | par_ouv expression OR expression par_fer
+    | NOT par_ouv expression par_fer
+    | expression add expression
+    | expression sous expression
+    | expression mult expression
+    | expression division expression
+    | par_ouv expression par_fer
 ;
+
 type:
     Int
-  | Float
+  | reel
 ;
+
 declaration:
     let liste_idf separ_dec type pvg
-  | let liste_idf separ_dec crochet_ouv type pvg constante crochet_fer pvg
+  | let liste_idf separ_dec declaration_tableau
 ;
+
+declaration_tableau:
+    crochet_ouv type pvg constante crochet_fer pvg
+;
+
 liste_idf:
     IDF
-  | liste_idf vg IDF
+    | liste_idf vg IDF
 ;
-const_declaration:
-    define Const IDF separ_dec type constante pvg
 
+const_declaration:
+    at_sign define Const IDF separ_dec type affect_val constante pvg
+;
 declarations:
     declaration
   | const_declaration   
   | declarations declaration
   | declarations const_declaration
+  | /* vide */
+;
+
 inOut:
     input_var par_ouv IDF par_fer pvg
+    | output_var par_ouv IDF par_fer pvg
+    | output_var par_ouv expression par_fer pvg
     | output_var par_ouv chaine par_fer pvg
+;
 
-affectation :
-    IDF aff constante pvg
-    | IDF aff_const constante pvg
-    | IDF aff_const Float pvg
-    | IDF aff_const chaine pvg
+affectation:
+    IDF aff expression pvg
+    | IDF crochet_ouv expression crochet_fer aff expression pvg
+;
 
-condition :
+condition:
     IF par_ouv expression par_fer THEN acc_ouv instructions acc_fer
     | IF par_ouv expression par_fer THEN acc_ouv instructions acc_fer ELSE acc_ouv instructions acc_fer
+;
 
 boucle:
     DO acc_ouv instructions acc_fer WHILE par_ouv expression par_fer pvg
     | FOR IDF FROM constante TO constante STEP constante acc_ouv instructions acc_fer
-
+;
 
 %%
 int main ()
 {
     return yyparse ();
 }
-void yyerror(const char *msg)
-{
-    fprintf(stderr, "Erreur syntaxique : %s\n", msg);
+void yyerror(const char *msg) {
+    printf("Erreur syntaxique à la ligne %d, colonne %d : %s\n", nb_ligne, col, msg);
 }
