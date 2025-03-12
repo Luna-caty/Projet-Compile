@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include "table_sym.h"
 extern int nb_ligne;
 extern int col;
 extern int yylex();  
@@ -147,7 +148,10 @@ boucle:
 %%
 int main ()
 {
-    return yyparse ();
+    initialization();
+    yyparse ();
+    afficher();
+    return 0;
 }
 void yyerror(const char *msg) {
     printf("Erreur syntaxique à la ligne %d, colonne %d : %s\n", nb_ligne, col, msg);

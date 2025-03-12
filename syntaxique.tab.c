@@ -71,6 +71,7 @@
 #line 1 "syntaxique.y"
 
 #include <stdio.h>
+#include "table_sym.h"
 extern int nb_ligne;
 extern int col;
 extern int yylex();  
@@ -79,7 +80,7 @@ int yywrap();
 
 
 /* Line 189 of yacc.c  */
-#line 83 "syntaxique.tab.c"
+#line 84 "syntaxique.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -164,7 +165,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 11 "syntaxique.y"
+#line 12 "syntaxique.y"
 
     int entier;
     float reel;
@@ -173,7 +174,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 177 "syntaxique.tab.c"
+#line 178 "syntaxique.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -185,7 +186,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 189 "syntaxique.tab.c"
+#line 190 "syntaxique.tab.c"
 
 #ifdef short
 # undef short
@@ -498,12 +499,12 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    42,    42,    48,    49,    50,    51,    55,    56,    57,
-      58,    59,    60,    68,    69,    79,    80,    81,    82,    83,
-      84,    85,    86,    87,    88,    89,    90,    91,    92,    96,
-      97,   101,   102,   106,   110,   111,   115,   118,   119,   120,
-     121,   122,   126,   127,   128,   129,   133,   134,   138,   139,
-     143,   144
+       0,    43,    43,    49,    50,    51,    52,    56,    57,    58,
+      59,    60,    61,    69,    70,    80,    81,    82,    83,    84,
+      85,    86,    87,    88,    89,    90,    91,    92,    93,    97,
+      98,   102,   103,   107,   111,   112,   116,   119,   120,   121,
+     122,   123,   127,   128,   129,   130,   134,   135,   139,   140,
+     144,   145
 };
 #endif
 
@@ -1523,14 +1524,14 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 43 "syntaxique.y"
+#line 44 "syntaxique.y"
     {printf("Structure correcte\n");;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1534 "syntaxique.tab.c"
+#line 1535 "syntaxique.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1742,11 +1743,14 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 147 "syntaxique.y"
+#line 148 "syntaxique.y"
 
 int main ()
 {
-    return yyparse ();
+    initialization();
+    yyparse ();
+    afficher();
+    return 0;
 }
 void yyerror(const char *msg) {
     printf("Erreur syntaxique à la ligne %d, colonne %d : %s\n", nb_ligne, col, msg);
