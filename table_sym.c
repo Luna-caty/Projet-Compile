@@ -105,3 +105,29 @@ void afficher() {
     }
     printf("---------------------------------------------------\n");
 }
+
+
+
+int estConstante(char* identifiant) {
+    IdfConstTS* elem = rechercherIdfConst(identifiant);
+    return (elem != NULL && strcmp(elem->code, "Const") == 0);
+}
+
+int verifierDepassementTableau(char* idf, int index) {
+    IdfConstTS* elem = rechercherIdfConst(idf);
+    
+    if (elem) {
+        int taille = atoi(elem->value);  // Convertit la taille stockÃ©e en string
+        if (index < 0 || index >= taille) {
+            printf("Erreur : DÃ©passement de tableau %s a l indice %d (taille %d)\n", idf, index, taille);
+            fflush(stdout);
+            return 0;  // DÃ©passement
+        }
+        return 1;  // AccÃ¨s valide
+    }
+}
+int typesCompatibles(const char* type1, const char* type2) {
+   
+    return (strcmp(type1, type2) == 0);
+}
+

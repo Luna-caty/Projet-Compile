@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 // pour idf et const 
 typedef struct IdfConstTS  {
     int state;
@@ -29,3 +30,9 @@ void insererMcSep(char entite[], char type[], int state);
 IdfConstTS* rechercherIdfConst(char entite[]);
 mcSepTS* rechercherMcSep(char entite[]);
 void afficher();
+
+
+int verifierDepassementTableau(char* idf, int index);
+int estConstante(char* identifiant);
+int typesCompatibles(const char* type1, const char* type2);
+int gestionErreurSemantique(const char* identifiant, int ligne);

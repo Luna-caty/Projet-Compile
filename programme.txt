@@ -1,32 +1,18 @@
-MainPrgm L3_software ;
-Var
-let x, y, z : Int ;
-let A : [Int; 10] ;
-BeginPg
-{
-    x := 5 ;
-    y := 10 ;
-    z := x + y ;
-    
-    A[0] := 1 ;
-    
-    output("La somme est: ") ;
-    output(z) ;
-    
-    input(x) ;
-    
-    if (x > 0) then {
-        output("x est positif") ;
-    } else {
-        output("x est negatif ou nul") ;
-    }
-    
-    for i from 1 to 5 step 1 {
-        A[i] := i * 2 ;
-    }
-    
-    do {
-        y := y - 1 ;
-    } while (y > 0) ;
+
+MainPrgm MonProgramme;
+
+Var 
+    let x, y  : Int;
+  
+
+BeginPg {
+    x := z;
+
+    tab[x] := a;
+
+ 
+
+    x := 10;
+    y := 20;
 }
-EndPg ;
+EndPg;

@@ -97,16 +97,22 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 12 "syntaxique.y"
+#line 14 "syntaxique.y"
 
     int entier;
     float reel;
     char* chaine;
+    struct {
+        char* type;  // Pour stocker le type de l'expression
+        int valeur_int;
+        float valeur_float;
+        char* chaine;
+    } expr;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 110 "syntaxique.tab.h"
+#line 116 "syntaxique.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -115,4 +121,18 @@ typedef union YYSTYPE
 
 extern YYSTYPE yylval;
 
+#if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
+typedef struct YYLTYPE
+{
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+} YYLTYPE;
+# define yyltype YYLTYPE /* obsolescent; will be withdrawn */
+# define YYLTYPE_IS_DECLARED 1
+# define YYLTYPE_IS_TRIVIAL 1
+#endif
+
+extern YYLTYPE yylloc;
 
