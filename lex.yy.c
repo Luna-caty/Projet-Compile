@@ -1166,16 +1166,34 @@ YY_RULE_SETUP
     else  
         printf("Erreur lexicale : Identificateur trop long '%s' (ligne %d)\n", yytext, nb_ligne);
     
-    if(!rechercherIdfConst(yytext))
-    {
-        insererIdfConst(yytext,"IDF","","",1);
+    if(!rechercherIdfConst(yytext)) {
+        // Créer un nouvel identifiant avec declared=0
+        IdfConstTS* new = (IdfConstTS*)malloc(sizeof(IdfConstTS));
+        strcpy(new->name, yytext);
+        strcpy(new->code, "IDF");
+        strcpy(new->type, "");
+        strcpy(new->value, "");
+        new->state = 1;
+        new->declared = 0;  // Non déclaré initialement
+        new->suiv = NULL;
+        
+        // Ajouter à la liste
+        if (listeIdfConst == NULL) {
+            listeIdfConst = new;
+        } else {
+            IdfConstTS* temp = listeIdfConst;
+            while (temp->suiv != NULL) {
+                temp = temp->suiv;
+            }
+            temp->suiv = new;
+        }
     }
     return IDF;
 }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 317 "lexical.l"
+#line 335 "lexical.l"
 { yylval.entier = atoi(yytext);
  if (yylval.entier < -32768 || yylval.entier > 32767) 
     printf("Erreur lexicale : Constante entière hors limites '%s' (ligne %d)\n", yytext, nb_ligne);
@@ -1187,7 +1205,7 @@ if(!rechercherIdfConst(yytext))
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 326 "lexical.l"
+#line 344 "lexical.l"
 { yylval.reel = atof(yytext); return reel; 
 if(!rechercherIdfConst(yytext))
     {
@@ -1199,40 +1217,40 @@ if(!rechercherIdfConst(yytext))
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 334 "lexical.l"
+#line 352 "lexical.l"
 { yylval.chaine = strdup(yytext); return chaine; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 335 "lexical.l"
+#line 353 "lexical.l"
 {printf("Commentaire sur une seule ligne"); }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 336 "lexical.l"
+#line 354 "lexical.l"
 {printf("Commentaire sur plusieurs lignes");}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 338 "lexical.l"
+#line 356 "lexical.l"
 ;
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 340 "lexical.l"
+#line 358 "lexical.l"
 { nb_ligne++; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 342 "lexical.l"
+#line 360 "lexical.l"
 { printf("Erreur lexicale à la ligne %d: caractère inattendu '%s'\n", nb_ligne, yytext); }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 344 "lexical.l"
+#line 362 "lexical.l"
 ECHO;
 	YY_BREAK
-#line 1236 "lex.yy.c"
+#line 1254 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2118,6 +2136,6 @@ int main()
 	return 0;
 	}
 #endif
-#line 344 "lexical.l"
+#line 362 "lexical.l"
 
 

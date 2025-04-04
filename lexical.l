@@ -308,9 +308,27 @@ commentLignes "{--"(.|\n)*"--}"
     else  
         printf("Erreur lexicale : Identificateur trop long '%s' (ligne %d)\n", yytext, nb_ligne);
     
-    if(!rechercherIdfConst(yytext))
-    {
-        insererIdfConst(yytext,"IDF","","",1);
+    if(!rechercherIdfConst(yytext)) {
+        // Créer un nouvel identifiant avec declared=0
+        IdfConstTS* new = (IdfConstTS*)malloc(sizeof(IdfConstTS));
+        strcpy(new->name, yytext);
+        strcpy(new->code, "IDF");
+        strcpy(new->type, "");
+        strcpy(new->value, "");
+        new->state = 1;
+        new->declared = 0;  // Non déclaré initialement
+        new->suiv = NULL;
+        
+        // Ajouter à la liste
+        if (listeIdfConst == NULL) {
+            listeIdfConst = new;
+        } else {
+            IdfConstTS* temp = listeIdfConst;
+            while (temp->suiv != NULL) {
+                temp = temp->suiv;
+            }
+            temp->suiv = new;
+        }
     }
     return IDF;
 }

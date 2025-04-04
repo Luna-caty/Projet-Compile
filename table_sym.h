@@ -4,14 +4,15 @@
 
 
 // pour idf et const 
-typedef struct IdfConstTS  {
+typedef struct IdfConstTS {
     int state;
-    char name [20];
-    char code [20];
-    char type [20];
-    char value [20];
+    char name[20];
+    char code[20];
+    char type[20];
+    char value[20];
+    int declared;  // Ajouter ce champ
     struct IdfConstTS *suiv;
-}IdfConstTS;
+} IdfConstTS;
 
 // pour mot clé et separateur 
 typedef struct mcSepTS {
