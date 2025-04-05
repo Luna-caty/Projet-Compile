@@ -10,7 +10,8 @@ typedef struct IdfConstTS {
     char code[20];
     char type[20];
     char value[20];
-    int declared;  // Ajouter ce champ
+    int declared;  
+    int array_size;
     struct IdfConstTS *suiv;
 } IdfConstTS;
 
@@ -30,10 +31,5 @@ void insererIdfConst(char entite[], char code[], char type[], char val[], int st
 void insererMcSep(char entite[], char type[], int state);
 IdfConstTS* rechercherIdfConst(char entite[]);
 mcSepTS* rechercherMcSep(char entite[]);
+int typesCompatibles(const char* type1, const char* type2) ;
 void afficher();
-
-
-int verifierDepassementTableau(char* idf, int index);
-int estConstante(char* identifiant);
-int typesCompatibles(const char* type1, const char* type2);
-int gestionErreurSemantique(const char* identifiant, int ligne);

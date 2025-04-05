@@ -30,6 +30,7 @@ void insererIdfConst(char entite[], char code[], char type[], char val[], int st
         strcpy(new->type, type);
         strcpy(new->value, val);
         new->declared = 1;  // Déclaré
+        new->array_size = 0; 
         new->suiv = NULL;
         
         if (listeIdfConst == NULL) {
@@ -114,20 +115,21 @@ void afficher() {
     }
     printf("---------------------------------------------------\n");
 }
+int typesCompatibles(const char* type1, const char* type2) 
+{
 
-int typesCompatibles(const char* type1, const char* type2) {
-    // Si les types sont identiques, ils sont compatibles
-    if (strcmp(type1, type2) == 0) {
+    if (strcmp(type1, type2) == 0) 
+    {
         return 1;
     }
-    
-    // Règles de compatibilité spécifiques à votre langage
-    // Par exemple, Int peut être compatible avec Float dans certaines opérations
-    if ((strcmp(type1, "Int") == 0 && strcmp(type2, "Float") == 0) ||
-        (strcmp(type1, "Float") == 0 && strcmp(type2, "Int") == 0)) {
+    if (strcmp(type1, "Int") == 0 && strcmp(type2, "Float") == 0) 
+    {
         return 1;
     }
-    
-    // Par défaut, les types sont incompatibles
+    if (strcmp(type1, "Float") == 0 && strcmp(type2, "Int") == 0) {
+        return 1;
+    }
+            
+            
     return 0;
 }

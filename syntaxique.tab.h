@@ -97,23 +97,27 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 16 "syntaxique.y"
+#line 18 "syntaxique.y"
 
     int entier;
     float reel;
     char* chaine;
-    char* type; // pour les types
+    char* type; 
     struct {
-        char* nature;  // "int", "float", "idf", "constante", "reel", "expression", etc.
-        float valeur;  // valeur si connue (0 par défaut pour idf)
-        char* nom;     // utile pour IDF : nom de la variable
-        char*type;
+        char* nature;
+        float valeur;
+        char* nom;     
+        char* type;
     } expr;
+    struct {
+        char* type;
+        int size;
+    } array_info;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 117 "syntaxique.tab.h"
+#line 121 "syntaxique.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

@@ -78,13 +78,14 @@ extern int nb_ligne;
 extern int col;
 extern int yylex();  
 int nombre_erreurs_semantiques = 0;
+int tableau_courant_taille = 0;
 
 void yyerror(const char *msg);
 int yywrap();
 
 
 /* Line 189 of yacc.c  */
-#line 88 "syntaxique.tab.c"
+#line 89 "syntaxique.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -169,23 +170,27 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 16 "syntaxique.y"
+#line 18 "syntaxique.y"
 
     int entier;
     float reel;
     char* chaine;
-    char* type; // pour les types
+    char* type; 
     struct {
-        char* nature;  // "int", "float", "idf", "constante", "reel", "expression", etc.
-        float valeur;  // valeur si connue (0 par défaut pour idf)
-        char* nom;     // utile pour IDF : nom de la variable
-        char*type;
+        char* nature;
+        float valeur;
+        char* nom;     
+        char* type;
     } expr;
+    struct {
+        char* type;
+        int size;
+    } array_info;
 
 
 
 /* Line 214 of yacc.c  */
-#line 189 "syntaxique.tab.c"
+#line 194 "syntaxique.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -197,7 +202,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 201 "syntaxique.tab.c"
+#line 206 "syntaxique.tab.c"
 
 #ifdef short
 # undef short
@@ -412,16 +417,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  4
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   300
+#define YYLAST   188
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  51
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  16
+#define YYNNTS  15
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  50
+#define YYNRULES  40
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  141
+#define YYNSTATES  130
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
@@ -471,50 +476,46 @@ static const yytype_uint8 yytranslate[] =
    YYRHS.  */
 static const yytype_uint8 yyprhs[] =
 {
-       0,     0,     3,    15,    17,    19,    21,    23,    25,    27,
-      29,    31,    33,    35,    37,    40,    42,    44,    46,    48,
-      53,    57,    63,    69,    74,    78,    82,    86,    90,    94,
-      96,    98,   104,   109,   116,   118,   122,   132,   134,   136,
-     139,   142,   143,   149,   155,   161,   166,   174,   183,   196,
-     206
+       0,     0,     3,    15,    17,    19,    21,    23,    25,    28,
+      30,    32,    34,    36,    41,    47,    53,    58,    62,    66,
+      70,    74,    78,    80,    82,    88,    93,   100,   102,   106,
+     116,   117,   120,   123,   129,   135,   140,   148,   157,   170,
+     180
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      52,     0,    -1,     3,    10,    32,     4,    62,     5,    45,
-      55,    46,     6,    32,    -1,    64,    -1,    63,    -1,    65,
-      -1,    66,    -1,    39,    -1,    40,    -1,    41,    -1,    42,
-      -1,    43,    -1,    44,    -1,    53,    -1,    55,    53,    -1,
-      10,    -1,    16,    -1,    17,    -1,    14,    -1,    10,    49,
-      56,    50,    -1,    56,    54,    56,    -1,    47,    56,    28,
-      56,    48,    -1,    47,    56,    27,    56,    48,    -1,    29,
-      47,    56,    48,    -1,    56,    35,    56,    -1,    56,    36,
-      56,    -1,    56,    37,    56,    -1,    56,    38,    56,    -1,
-      47,    56,    48,    -1,    15,    -1,    17,    -1,    11,    60,
-      34,    57,    32,    -1,    11,    60,    34,    59,    -1,    49,
-      57,    32,    16,    50,    32,    -1,    10,    -1,    60,    33,
-      10,    -1,    13,    12,     9,    10,    34,    57,    31,    16,
-      32,    -1,    58,    -1,    61,    -1,    62,    58,    -1,    62,
-      61,    -1,    -1,     7,    47,    10,    48,    32,    -1,     8,
-      47,    56,    48,    32,    -1,     8,    47,    14,    48,    32,
-      -1,    10,    30,    56,    32,    -1,    10,    49,    56,    50,
-      30,    56,    32,    -1,    18,    47,    56,    48,    19,    45,
-      55,    46,    -1,    18,    47,    56,    48,    19,    45,    55,
-      46,    20,    45,    55,    46,    -1,    21,    45,    55,    46,
-      22,    47,    56,    48,    32,    -1,    23,    10,    24,    16,
-      25,    16,    26,    16,    45,    55,    46,    -1
+      52,     0,    -1,     3,    10,    32,     4,    61,     5,    45,
+      54,    46,     6,    32,    -1,    63,    -1,    62,    -1,    64,
+      -1,    65,    -1,    53,    -1,    54,    53,    -1,    10,    -1,
+      16,    -1,    17,    -1,    14,    -1,    10,    49,    55,    50,
+      -1,    47,    55,    28,    55,    48,    -1,    47,    55,    27,
+      55,    48,    -1,    29,    47,    55,    48,    -1,    55,    35,
+      55,    -1,    55,    36,    55,    -1,    55,    37,    55,    -1,
+      55,    38,    55,    -1,    47,    55,    48,    -1,    15,    -1,
+      17,    -1,    11,    59,    34,    56,    32,    -1,    11,    59,
+      34,    58,    -1,    49,    56,    32,    16,    50,    32,    -1,
+      10,    -1,    59,    33,    10,    -1,    13,    12,     9,    10,
+      34,    56,    31,    16,    32,    -1,    -1,    57,    61,    -1,
+      60,    61,    -1,     7,    47,    10,    48,    32,    -1,     8,
+      47,    14,    48,    32,    -1,    10,    30,    55,    32,    -1,
+      10,    49,    55,    50,    30,    55,    32,    -1,    18,    47,
+      55,    48,    19,    45,    54,    46,    -1,    18,    47,    55,
+      48,    19,    45,    54,    46,    20,    45,    54,    46,    -1,
+      21,    45,    54,    46,    22,    47,    55,    48,    32,    -1,
+      23,    10,    24,    16,    25,    16,    26,    16,    45,    54,
+      46,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    60,    60,    66,    67,    68,    69,    73,    74,    75,
-      76,    77,    78,    84,    85,    91,   106,   114,   122,   128,
-     134,   141,   147,   153,   159,   223,   288,   350,   388,   398,
-     402,   409,   440,   444,   448,   452,   469,   472,   473,   474,
-     475,   476,   480,   481,   482,   486,   546,   557,   558,   562,
-     563
+       0,    68,    68,    74,    75,    76,    77,    80,    81,    87,
+     102,   110,   118,   124,   155,   161,   167,   173,   251,   328,
+     404,   442,   452,   456,   463,   488,   514,   524,   528,   544,
+     556,   558,   559,   563,   571,   575,   673,   722,   723,   727,
+     728
 };
 #endif
 
@@ -530,8 +531,8 @@ static const char *const yytname[] =
   "affect_val", "pvg", "vg", "separ_dec", "add", "sous", "mult",
   "division", "inf_egal", "sup_egal", "inf", "sup", "egal", "not_egal",
   "acc_ouv", "acc_fer", "par_ouv", "par_fer", "crochet_ouv", "crochet_fer",
-  "$accept", "programme", "instruction", "op_cmp", "instructions",
-  "expression", "type", "declaration", "declaration_tableau", "liste_idf",
+  "$accept", "programme", "instruction", "instructions", "expression",
+  "type", "declaration", "declaration_tableau", "liste_idf",
   "const_declaration", "declarations", "inOut", "affectation", "condition",
   "boucle", 0
 };
@@ -554,22 +555,20 @@ static const yytype_uint16 yytoknum[] =
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    51,    52,    53,    53,    53,    53,    54,    54,    54,
-      54,    54,    54,    55,    55,    56,    56,    56,    56,    56,
-      56,    56,    56,    56,    56,    56,    56,    56,    56,    57,
-      57,    58,    58,    59,    60,    60,    61,    62,    62,    62,
-      62,    62,    63,    63,    63,    64,    64,    65,    65,    66,
-      66
+       0,    51,    52,    53,    53,    53,    53,    54,    54,    55,
+      55,    55,    55,    55,    55,    55,    55,    55,    55,    55,
+      55,    55,    56,    56,    57,    57,    58,    59,    59,    60,
+      61,    61,    61,    62,    62,    63,    63,    64,    64,    65,
+      65
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,    11,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     2,     1,     1,     1,     1,     4,
-       3,     5,     5,     4,     3,     3,     3,     3,     3,     1,
-       1,     5,     4,     6,     1,     3,     9,     1,     1,     2,
-       2,     0,     5,     5,     5,     4,     7,     8,    12,     9,
+       0,     2,    11,     1,     1,     1,     1,     1,     2,     1,
+       1,     1,     1,     4,     5,     5,     4,     3,     3,     3,
+       3,     3,     1,     1,     5,     4,     6,     1,     3,     9,
+       0,     2,     2,     5,     5,     4,     7,     8,    12,     9,
       11
 };
 
@@ -578,28 +577,26 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     0,     1,     0,    41,     0,     0,    37,
-      38,     0,    34,     0,     0,     0,    39,    40,     0,     0,
-       0,     0,    35,    29,    30,     0,     0,    32,     0,     0,
-       0,     0,     0,     0,     0,    13,     0,     4,     3,     5,
-       6,     0,    31,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,    14,     0,     0,     0,    15,    18,    16,    17,
-       0,     0,     0,    18,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     7,     8,     9,    10,    11,    12,     0,     0,    45,
-       0,     0,     0,     0,     2,     0,     0,    42,     0,    44,
-       0,     0,     0,    28,    24,    25,    26,    27,    43,    20,
-       0,     0,     0,     0,    33,    36,    19,    23,     0,     0,
-       0,     0,     0,     0,    22,    21,    46,     0,     0,     0,
-      47,     0,     0,     0,    49,     0,     0,     0,     0,    50,
-      48
+       0,     0,     0,     0,     1,     0,    30,     0,     0,    30,
+      30,     0,    27,     0,     0,    31,    32,     0,     0,     0,
+       0,     0,    28,    22,    23,     0,     0,    25,     0,     0,
+       0,     0,     0,     0,     0,     7,     0,     4,     3,     5,
+       6,     0,    24,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     8,     0,     0,     0,     0,     9,    12,    10,
+      11,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,    35,     0,     0,     0,
+       0,     0,     0,     0,     0,     2,     0,     0,    33,    34,
+       0,     0,     0,     0,    21,    17,    18,    19,    20,     0,
+       0,     0,     0,    26,    29,    13,    16,     0,     0,     0,
+       0,     0,     0,    15,    14,    36,     0,     0,     0,    37,
+       0,     0,     0,    39,     0,     0,     0,     0,    40,    38
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2,    35,    88,    36,    62,    26,     9,    27,    13,
-      10,    11,    37,    38,    39,    40
+      -1,     2,    35,    36,    63,    26,     9,    27,    13,    10,
+      11,    37,    38,    39,    40
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
@@ -607,28 +604,26 @@ static const yytype_int8 yydefgoto[] =
 #define YYPACT_NINF -49
 static const yytype_int16 yypact[] =
 {
-       3,     0,    17,   -12,   -49,    29,    16,    36,    38,   -49,
-     -49,    51,   -49,    10,    44,    12,   -49,   -49,    45,    -1,
-      58,   104,   -49,   -49,   -49,    25,    43,   -49,    47,    35,
-      37,   -28,    42,    33,    84,   -49,     1,   -49,   -49,   -49,
-     -49,    63,   -49,    25,    86,    76,    90,    90,    90,   104,
-      73,    92,   -49,    87,    78,    65,    61,    67,   -49,   -49,
-      69,    90,   149,   -49,   233,   117,   163,     5,   101,    88,
-      68,   105,    94,    90,    96,    90,   103,    90,    90,    90,
-      90,   -49,   -49,   -49,   -49,   -49,   -49,    97,    90,   -49,
-     102,   114,   112,    99,   -49,   116,   118,   -49,   133,   -49,
-     177,    90,    90,   -49,    28,    28,   -49,   -49,   -49,   256,
-      90,    91,   115,   119,   -49,   -49,   -49,   -49,   191,   205,
-     246,   104,    90,   123,   -49,   -49,   -49,    31,   219,   147,
-     144,   134,   120,   135,   -49,   104,   104,    53,    62,   -49,
-     -49
+       5,     6,    19,    -1,   -49,    33,     1,    31,    34,     1,
+       1,    56,   -49,   -11,    54,   -49,   -49,    20,    63,    43,
+      64,    98,   -49,   -49,   -49,    21,    51,   -49,    30,    28,
+      39,   -24,    50,    44,    86,   -49,    -3,   -49,   -49,   -49,
+     -49,    67,   -49,    21,    88,   101,    71,    71,    71,    98,
+      89,   111,   -49,   104,    91,    75,    85,    92,   -49,   -49,
+     -49,   110,    71,   131,    74,    94,     3,   122,   107,   109,
+     142,   128,   130,    71,    71,    66,   -49,    71,    71,    71,
+      71,   134,   152,   150,   153,   -49,   145,   147,   -49,   -49,
+      90,    99,    71,    71,   -49,     7,     7,   -49,   -49,    71,
+     135,   136,   165,   -49,   -49,   -49,   -49,   108,   113,   138,
+      98,    71,   156,   -49,   -49,   -49,    32,   117,   168,   166,
+     155,   140,   143,   -49,    98,    98,    49,    61,   -49,   -49
 };
 
 /* YYPGOTO[NTERM-NUM].  */
-static const yytype_int16 yypgoto[] =
+static const yytype_int8 yypgoto[] =
 {
-     -49,   -49,   -36,   -49,   -48,   -43,   -18,   167,   -49,   -49,
-     168,   -49,   -49,   -49,   -49,   -49
+     -49,   -49,   -36,   -48,   -45,   -16,   -49,   -49,   -49,   -49,
+      42,   -49,   -49,   -49,   -49
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -638,93 +633,67 @@ static const yytype_int16 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-      52,    67,    46,    64,    65,    66,     1,    41,    29,    30,
-       3,    31,    29,    30,    23,    31,    24,     4,    76,    32,
-       5,    47,    33,    32,    34,    54,    33,     7,    34,     8,
-      98,    52,   100,     6,   104,   105,   106,   107,    29,    30,
-      23,    31,    24,    18,    19,   109,    12,    51,    25,    32,
-      14,    92,    33,    20,    34,    22,    15,    21,   118,   119,
-      29,    30,     7,    31,     8,    79,    80,   120,    28,    29,
-      30,    32,    31,   127,    33,    42,    34,   130,    49,   128,
-      32,    43,    44,    33,    45,    34,    56,   137,   138,    48,
-      57,    52,    58,    59,    50,    53,    55,    68,    69,   139,
-      56,    52,    52,    70,    63,    60,    58,    59,   140,    71,
-      73,    29,    30,    72,    31,    74,    75,    93,    95,    60,
-      94,    96,    32,    61,   113,    33,    97,    34,    99,   108,
-     101,   102,   110,   111,   112,   123,   121,    61,    77,    78,
-      79,    80,    81,    82,    83,    84,    85,    86,   114,   129,
-     115,   103,    77,    78,    79,    80,    81,    82,    83,    84,
-      85,    86,   122,   132,   133,   135,   134,    90,    77,    78,
-      79,    80,    81,    82,    83,    84,    85,    86,    16,    17,
-     136,     0,     0,   116,    77,    78,    79,    80,    81,    82,
-      83,    84,    85,    86,     0,     0,     0,    87,    77,    78,
-      79,    80,    81,    82,    83,    84,    85,    86,     0,     0,
-       0,    91,    77,    78,    79,    80,    81,    82,    83,    84,
-      85,    86,     0,     0,     0,   117,    77,    78,    79,    80,
-      81,    82,    83,    84,    85,    86,     0,     0,     0,   124,
-      77,    78,    79,    80,    81,    82,    83,    84,    85,    86,
-       0,     0,     0,   125,    77,    78,    79,    80,    81,    82,
-      83,    84,    85,    86,     0,    89,     0,   131,    77,    78,
-      79,    80,    81,    82,    83,    84,    85,    86,   126,     0,
-       0,    77,    78,    79,    80,    81,    82,    83,    84,    85,
-      86,    77,    78,    79,    80,    81,    82,    83,    84,    85,
-      86
+      52,    66,    64,    65,    29,    30,    46,    31,     1,    41,
+      29,    30,     7,    31,     8,    32,     3,    75,    33,     4,
+      34,    32,    18,    19,    33,    47,    34,    54,    90,    91,
+      52,     5,    95,    96,    97,    98,    23,     6,    24,    29,
+      30,    12,    31,    51,    79,    80,    14,   107,   108,    83,
+      32,    15,    16,    33,   109,    34,    29,    30,    23,    31,
+      24,    17,   116,    20,    43,    21,   117,    32,    29,    30,
+      33,    31,    34,    22,    28,    44,   126,   127,   119,    32,
+      52,    57,    33,    42,    34,    58,    45,    59,    60,    49,
+      52,    52,    25,    92,    93,   128,    50,    48,    55,    53,
+      61,    77,    78,    79,    80,    29,    30,   129,    31,    77,
+      78,    79,    80,    67,    94,    56,    32,    68,    62,    33,
+      69,    34,    70,    71,    81,    77,    78,    79,    80,    77,
+      78,    79,    80,    72,    77,    78,    79,    80,    84,    85,
+     105,    73,    82,    77,    78,    79,    80,   106,    77,    78,
+      79,    80,    77,    78,    79,    80,   113,    74,    87,    86,
+      88,   114,    89,    76,    99,   120,    77,    78,    79,    80,
+     115,   100,   101,    77,    78,    79,    80,   103,   102,   104,
+     110,   112,   118,   111,   121,   124,   122,   123,   125
 };
 
-static const yytype_int16 yycheck[] =
+static const yytype_uint8 yycheck[] =
 {
-      36,    49,    30,    46,    47,    48,     3,    25,     7,     8,
-      10,    10,     7,     8,    15,    10,    17,     0,    61,    18,
-      32,    49,    21,    18,    23,    43,    21,    11,    23,    13,
-      73,    67,    75,     4,    77,    78,    79,    80,     7,     8,
-      15,    10,    17,    33,    34,    88,    10,    46,    49,    18,
-      12,    46,    21,     9,    23,    10,     5,    45,   101,   102,
-       7,     8,    11,    10,    13,    37,    38,   110,    10,     7,
-       8,    18,    10,   121,    21,    32,    23,    46,    45,   122,
-      18,    34,    47,    21,    47,    23,    10,   135,   136,    47,
-      14,   127,    16,    17,    10,    32,    10,    24,     6,    46,
-      10,   137,   138,    16,    14,    29,    16,    17,    46,    31,
-      49,     7,     8,    48,    10,    48,    47,    16,    50,    29,
-      32,    16,    18,    47,    25,    21,    32,    23,    32,    32,
-      27,    28,    30,    19,    22,    16,    45,    47,    35,    36,
-      37,    38,    39,    40,    41,    42,    43,    44,    32,    26,
-      32,    48,    35,    36,    37,    38,    39,    40,    41,    42,
-      43,    44,    47,    16,    20,    45,    32,    50,    35,    36,
-      37,    38,    39,    40,    41,    42,    43,    44,    11,    11,
-      45,    -1,    -1,    50,    35,    36,    37,    38,    39,    40,
-      41,    42,    43,    44,    -1,    -1,    -1,    48,    35,    36,
-      37,    38,    39,    40,    41,    42,    43,    44,    -1,    -1,
-      -1,    48,    35,    36,    37,    38,    39,    40,    41,    42,
-      43,    44,    -1,    -1,    -1,    48,    35,    36,    37,    38,
-      39,    40,    41,    42,    43,    44,    -1,    -1,    -1,    48,
-      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
-      -1,    -1,    -1,    48,    35,    36,    37,    38,    39,    40,
-      41,    42,    43,    44,    -1,    32,    -1,    48,    35,    36,
-      37,    38,    39,    40,    41,    42,    43,    44,    32,    -1,
-      -1,    35,    36,    37,    38,    39,    40,    41,    42,    43,
-      44,    35,    36,    37,    38,    39,    40,    41,    42,    43,
-      44
+      36,    49,    47,    48,     7,     8,    30,    10,     3,    25,
+       7,     8,    11,    10,    13,    18,    10,    62,    21,     0,
+      23,    18,    33,    34,    21,    49,    23,    43,    73,    74,
+      66,    32,    77,    78,    79,    80,    15,     4,    17,     7,
+       8,    10,    10,    46,    37,    38,    12,    92,    93,    46,
+      18,     9,    10,    21,    99,    23,     7,     8,    15,    10,
+      17,     5,   110,     9,    34,    45,   111,    18,     7,     8,
+      21,    10,    23,    10,    10,    47,   124,   125,    46,    18,
+     116,    10,    21,    32,    23,    14,    47,    16,    17,    45,
+     126,   127,    49,    27,    28,    46,    10,    47,    10,    32,
+      29,    35,    36,    37,    38,     7,     8,    46,    10,    35,
+      36,    37,    38,    24,    48,    14,    18,     6,    47,    21,
+      16,    23,    31,    48,    50,    35,    36,    37,    38,    35,
+      36,    37,    38,    48,    35,    36,    37,    38,    16,    32,
+      50,    49,    48,    35,    36,    37,    38,    48,    35,    36,
+      37,    38,    35,    36,    37,    38,    48,    47,    16,    50,
+      32,    48,    32,    32,    30,    48,    35,    36,    37,    38,
+      32,    19,    22,    35,    36,    37,    38,    32,    25,    32,
+      45,    16,    26,    47,    16,    45,    20,    32,    45
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,    52,    10,     0,    32,     4,    11,    13,    58,
-      61,    62,    10,    60,    12,     5,    58,    61,    33,    34,
-       9,    45,    10,    15,    17,    49,    57,    59,    10,     7,
-       8,    10,    18,    21,    23,    53,    55,    63,    64,    65,
-      66,    57,    32,    34,    47,    47,    30,    49,    47,    45,
-      10,    46,    53,    32,    57,    10,    10,    14,    16,    17,
-      29,    47,    56,    14,    56,    56,    56,    55,    24,     6,
-      16,    31,    48,    49,    48,    47,    56,    35,    36,    37,
-      38,    39,    40,    41,    42,    43,    44,    48,    54,    32,
-      50,    48,    46,    16,    32,    50,    16,    32,    56,    32,
-      56,    27,    28,    48,    56,    56,    56,    56,    32,    56,
-      30,    19,    22,    25,    32,    32,    50,    48,    56,    56,
-      56,    45,    47,    16,    48,    48,    32,    55,    56,    26,
-      46,    48,    16,    20,    32,    45,    45,    55,    55,    46,
-      46
+       0,     3,    52,    10,     0,    32,     4,    11,    13,    57,
+      60,    61,    10,    59,    12,    61,    61,     5,    33,    34,
+       9,    45,    10,    15,    17,    49,    56,    58,    10,     7,
+       8,    10,    18,    21,    23,    53,    54,    62,    63,    64,
+      65,    56,    32,    34,    47,    47,    30,    49,    47,    45,
+      10,    46,    53,    32,    56,    10,    14,    10,    14,    16,
+      17,    29,    47,    55,    55,    55,    54,    24,     6,    16,
+      31,    48,    48,    49,    47,    55,    32,    35,    36,    37,
+      38,    50,    48,    46,    16,    32,    50,    16,    32,    32,
+      55,    55,    27,    28,    48,    55,    55,    55,    55,    30,
+      19,    22,    25,    32,    32,    50,    48,    55,    55,    55,
+      45,    47,    16,    48,    48,    32,    54,    55,    26,    46,
+      48,    16,    20,    32,    45,    45,    54,    54,    46,    46
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1538,19 +1507,19 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 61 "syntaxique.y"
+#line 69 "syntaxique.y"
     {printf("Structure correcte\n");;}
     break;
 
-  case 15:
+  case 9:
 
 /* Line 1455 of yacc.c  */
-#line 92 "syntaxique.y"
+#line 88 "syntaxique.y"
     {
         IdfConstTS* symbole = rechercherIdfConst((yyvsp[(1) - (1)].chaine));
         if (!symbole || symbole->declared == 0) {
-        printf("Erreur semantique : identifiant '%s' non declaree a la ligne %d\n", (yyvsp[(1) - (1)].chaine), nb_ligne);
-        nombre_erreurs_semantiques++;
+            printf("Erreur semantique : identifiant '%s' non declaree a la ligne %d\n", (yyvsp[(1) - (1)].chaine), nb_ligne);
+            nombre_erreurs_semantiques++;
         }
         (yyval.expr).nature = strdup("idf");
         (yyval.expr).nom = strdup((yyvsp[(1) - (1)].chaine));
@@ -1562,10 +1531,10 @@ yyreduce:
     ;}
     break;
 
-  case 16:
+  case 10:
 
 /* Line 1455 of yacc.c  */
-#line 107 "syntaxique.y"
+#line 103 "syntaxique.y"
     {
         (yyval.expr).nature = strdup("constante");
         (yyval.expr).valeur = (yyvsp[(1) - (1)].entier);
@@ -1575,10 +1544,10 @@ yyreduce:
     ;}
     break;
 
-  case 17:
+  case 11:
 
 /* Line 1455 of yacc.c  */
-#line 115 "syntaxique.y"
+#line 111 "syntaxique.y"
     {
         (yyval.expr).nature = strdup("reel");
         (yyval.expr).valeur = (yyvsp[(1) - (1)].reel);
@@ -1588,10 +1557,10 @@ yyreduce:
     ;}
     break;
 
-  case 18:
+  case 12:
 
 /* Line 1455 of yacc.c  */
-#line 123 "syntaxique.y"
+#line 119 "syntaxique.y"
     {
         (yyval.expr).nature = strdup("chaine");
         (yyval.expr).nom = strdup((yyvsp[(1) - (1)].chaine));
@@ -1599,33 +1568,46 @@ yyreduce:
     ;}
     break;
 
-  case 19:
+  case 13:
 
 /* Line 1455 of yacc.c  */
-#line 129 "syntaxique.y"
+#line 125 "syntaxique.y"
     {
+        IdfConstTS* symbole = rechercherIdfConst((yyvsp[(1) - (4)].chaine));
+        if (!symbole || symbole->declared == 0) {
+            printf("Erreur semantique : identifiant '%s' non declaree a la ligne %d\n", (yyvsp[(1) - (4)].chaine), nb_ligne);
+            nombre_erreurs_semantiques++;
+        } else if (symbole->array_size <= 0) {
+            printf("Erreur semantique : '%s' n'est pas un tableau a la ligne %d\n", (yyvsp[(1) - (4)].chaine), nb_ligne);
+            nombre_erreurs_semantiques++;
+        } else {
+            // Vérifier si l'indice est une constante
+            if (strcmp((yyvsp[(3) - (4)].expr).nature, "constante") == 0) {
+                if ((yyvsp[(3) - (4)].expr).valeur < 0 || (yyvsp[(3) - (4)].expr).valeur >= symbole->array_size) {
+                    printf("Erreur semantique : indice %d hors limites pour le tableau '%s' de taille %d a la ligne %d\n", 
+                        (int)(yyvsp[(3) - (4)].expr).valeur, (yyvsp[(1) - (4)].chaine), symbole->array_size, nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+            }
+        }
+        
         (yyval.expr).nature = strdup("tableau_elem");
         (yyval.expr).nom = strdup((yyvsp[(1) - (4)].chaine));
         (yyval.expr).valeur = 0;
+        
+        // Récupérer le type de l'élément du tableau
+        if (symbole) {
+            (yyval.expr).type = strdup(symbole->type);
+        } else {
+            (yyval.expr).type = NULL;
+        }
     ;}
     break;
 
-  case 20:
+  case 14:
 
 /* Line 1455 of yacc.c  */
-#line 135 "syntaxique.y"
-    {
-        (yyval.expr).nature = strdup("condition");
-        (yyval.expr).nom = strdup("condition");
-        (yyval.expr).valeur = 0;
-
-    ;}
-    break;
-
-  case 21:
-
-/* Line 1455 of yacc.c  */
-#line 142 "syntaxique.y"
+#line 156 "syntaxique.y"
     {
         (yyval.expr).nature = strdup("logique");
         (yyval.expr).nom = strdup("and");
@@ -1633,10 +1615,10 @@ yyreduce:
     ;}
     break;
 
-  case 22:
+  case 15:
 
 /* Line 1455 of yacc.c  */
-#line 148 "syntaxique.y"
+#line 162 "syntaxique.y"
     {
         (yyval.expr).nature = strdup("logique");
         (yyval.expr).nom = strdup("or");
@@ -1644,10 +1626,10 @@ yyreduce:
     ;}
     break;
 
-  case 23:
+  case 16:
 
 /* Line 1455 of yacc.c  */
-#line 154 "syntaxique.y"
+#line 168 "syntaxique.y"
     {
         (yyval.expr).nature = strdup("logique");
         (yyval.expr).nom = strdup("not");
@@ -1655,213 +1637,255 @@ yyreduce:
     ;}
     break;
 
-  case 24:
+  case 17:
 
 /* Line 1455 of yacc.c  */
-#line 160 "syntaxique.y"
+#line 174 "syntaxique.y"
     {
-    (yyval.expr).nature = strdup("expression");
-    
-    // Déterminer le type de l'expression résultante
-    char *type1 = NULL, *type2 = NULL;
-    
-    // Obtenir le type de la première expression
-    if (strcmp((yyvsp[(1) - (3)].expr).nature, "idf") == 0) {
-        IdfConstTS* sym = rechercherIdfConst((yyvsp[(1) - (3)].expr).nom);
-        if (sym) type1 = sym->type;
-    } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "constante") == 0) {
-        type1 = "Int";
-    } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "reel") == 0) {
-        type1 = "Float";
-    } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "expression") == 0) {
-        // Supposons que le type est stocké d'une certaine manière
-        type1 = (yyvsp[(1) - (3)].expr).type;
-    }
-    
-    // Obtenir le type de la seconde expression
-    if (strcmp((yyvsp[(3) - (3)].expr).nature, "idf") == 0) {
-        IdfConstTS* sym = rechercherIdfConst((yyvsp[(3) - (3)].expr).nom);
-        if (sym) type2 = sym->type;
-    } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "constante") == 0) {
-        type2 = "Int";
-    } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "reel") == 0) {
-        type2 = "Float";
-    } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "expression") == 0) {
-        type2 = (yyvsp[(3) - (3)].expr).type;
-    }
-    
-    // Déterminer le type résultant (Float si l'une des expressions est Float)
-    if (type1 != NULL && type2 != NULL) {
-        if (strcmp(type1, "Float") == 0 || strcmp(type2, "Float") == 0) {
-            (yyval.expr).type = strdup("Float");
-        } else {
-            (yyval.expr).type = strdup("Int");
+     (yyval.expr).nature = strdup("expression");
+
+        char *type1 = NULL, *type2 = NULL;
+
+        // Détermination des types pour la première expression
+        if (strcmp((yyvsp[(1) - (3)].expr).nature, "idf") == 0) {
+            IdfConstTS* sym = rechercherIdfConst((yyvsp[(1) - (3)].expr).nom);
+            if (sym) type1 = sym->type;
+        } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "constante") == 0) {
+            type1 = "Int";
+        } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "reel") == 0) {
+            type1 = "Float";
+        } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "expression") == 0) {
+            type1 = (yyvsp[(1) - (3)].expr).type;
         }
-    } else {
-        (yyval.expr).type = NULL;  // Type indéterminé
-    }
-    
-    // Calcul de la valeur si constantes
-    if ((strcmp((yyvsp[(1) - (3)].expr).nature, "constante") == 0 || strcmp((yyvsp[(1) - (3)].expr).nature, "reel") == 0) &&
-        (strcmp((yyvsp[(3) - (3)].expr).nature, "constante") == 0 || strcmp((yyvsp[(3) - (3)].expr).nature, "reel") == 0)) {
-        (yyval.expr).valeur = (yyvsp[(1) - (3)].expr).valeur + (yyvsp[(3) - (3)].expr).valeur;
-        char tempStr[20];
-        sprintf(tempStr, "%f", (yyval.expr).valeur);
-        (yyval.expr).nom = strdup(tempStr);
-    } else {
-        (yyval.expr).nom = strdup("expr");
-        (yyval.expr).valeur = 0;
-    }
-    
-    // Vérification de compatibilité pour l'addition
-    if (type1 != NULL && type2 != NULL && !typesCompatibles(type1, type2)) {
-        printf("Erreur semantique : incompatibilite de types pour l'addition entre expressions de types %s et %s a la ligne %d\n", 
-               type1, type2, nb_ligne);
-        nombre_erreurs_semantiques++;
-    }
+        
+        // Détermination des types pour la seconde expression
+        if (strcmp((yyvsp[(3) - (3)].expr).nature, "idf") == 0) {
+            IdfConstTS* sym = rechercherIdfConst((yyvsp[(3) - (3)].expr).nom);
+            if (sym) type2 = sym->type;
+        } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "constante") == 0) {
+            type2 = "Int";
+        } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "reel") == 0) {
+            type2 = "Float";
+        } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "expression") == 0) {
+            type2 = (yyvsp[(3) - (3)].expr).type;
+        }
+        
+        // Détermination du type résultant
+        if (type1 != NULL && type2 != NULL) {
+            if (strcmp(type1, "Float") == 0 || strcmp(type2, "Float") == 0) {
+                (yyval.expr).type = strdup("Float");
+            } else {
+                (yyval.expr).type = strdup("Int");
+            }
+        } else {
+            (yyval.expr).type = NULL;
+        }
+        
+        // Calcul et vérification des valeurs
+        if ((strcmp((yyvsp[(1) - (3)].expr).nature, "constante") == 0 || strcmp((yyvsp[(1) - (3)].expr).nature, "reel") == 0) &&
+            (strcmp((yyvsp[(3) - (3)].expr).nature, "constante") == 0 || strcmp((yyvsp[(3) - (3)].expr).nature, "reel") == 0)) {
+            (yyval.expr).valeur = (yyvsp[(1) - (3)].expr).valeur + (yyvsp[(3) - (3)].expr).valeur;
+            
+            // Vérifier si le résultat est dans les limites pour le type déterminé
+            if ((yyval.expr).type != NULL && strcmp((yyval.expr).type, "Int") == 0) {
+                if ((yyval.expr).valeur < -32768 || (yyval.expr).valeur > 32767) {
+                    printf("Erreur semantique : le resultat de l'addition (%f) est hors limite pour le type Int a la ligne %d\n", 
+                        (yyval.expr).valeur, nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+                // Si résultat fractionnaire pour type Int
+                if ((yyval.expr).valeur != (int)(yyval.expr).valeur) {
+                    printf("Erreur semantique : l'addition produit une valeur avec partie fractionnaire (%f) pour un resultat de type Int a la ligne %d\n", 
+                        (yyval.expr).valeur, nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+            }
+            
+            char tempStr[20];
+            sprintf(tempStr, "%f", (yyval.expr).valeur);
+            (yyval.expr).nom = strdup(tempStr);
+        } else {
+            (yyval.expr).nom = strdup("expr");
+            (yyval.expr).valeur = 0;
+        }
+        
+        // Vérification de la compatibilité des types
+        if (type1 != NULL && type2 != NULL && !typesCompatibles(type1, type2)) {
+            printf("Erreur semantique : incompatibilite de types pour l'addition entre expressions de types %s et %s a la ligne %d\n", 
+                type1, type2, nb_ligne);
+            nombre_erreurs_semantiques++;
+        }
     ;}
     break;
 
-  case 25:
+  case 18:
 
 /* Line 1455 of yacc.c  */
-#line 224 "syntaxique.y"
-    {
-    (yyval.expr).nature = strdup("expression");
-    
-    // Déterminer le type de l'expression résultante
-    char *type1 = NULL, *type2 = NULL;
-    
-    // Obtenir le type de la première expression
-    if (strcmp((yyvsp[(1) - (3)].expr).nature, "idf") == 0) {
-        IdfConstTS* sym = rechercherIdfConst((yyvsp[(1) - (3)].expr).nom);
-        if (sym) type1 = sym->type;
-    } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "constante") == 0) {
-        type1 = "Int";
-    } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "reel") == 0) {
-        type1 = "Float";
-    } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "expression") == 0) {
-        // Supposons que le type est stocké d'une certaine manière
-        type1 = (yyvsp[(1) - (3)].expr).type;
-    }
-    
-    // Obtenir le type de la seconde expression
-    if (strcmp((yyvsp[(3) - (3)].expr).nature, "idf") == 0) {
-        IdfConstTS* sym = rechercherIdfConst((yyvsp[(3) - (3)].expr).nom);
-        if (sym) type2 = sym->type;
-    } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "constante") == 0) {
-        type2 = "Int";
-    } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "reel") == 0) {
-        type2 = "Float";
-    } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "expression") == 0) {
-        type2 = (yyvsp[(3) - (3)].expr).type;
-    }
-    
-    // Déterminer le type résultant (Float si l'une des expressions est Float)
-    if (type1 != NULL && type2 != NULL) {
-        if (strcmp(type1, "Float") == 0 || strcmp(type2, "Float") == 0) {
-            (yyval.expr).type = strdup("Float");
-        } else {
-            (yyval.expr).type = strdup("Int");
-        }
-    } else {
-        (yyval.expr).type = NULL;  // Type indéterminé
-    }
-    
-    // Calcul de la valeur si constantes
-    if ((strcmp((yyvsp[(1) - (3)].expr).nature, "constante") == 0 || strcmp((yyvsp[(1) - (3)].expr).nature, "reel") == 0) &&
-        (strcmp((yyvsp[(3) - (3)].expr).nature, "constante") == 0 || strcmp((yyvsp[(3) - (3)].expr).nature, "reel") == 0)) {
-        (yyval.expr).valeur = (yyvsp[(1) - (3)].expr).valeur + (yyvsp[(3) - (3)].expr).valeur;
-        char tempStr[20];
-        sprintf(tempStr, "%f", (yyval.expr).valeur);
-        (yyval.expr).nom = strdup(tempStr);
-    } else {
-        (yyval.expr).nom = strdup("expr");
-        (yyval.expr).valeur = 0;
-    }
-    
-    // Vérification de compatibilité pour l'addition
-    if (type1 != NULL && type2 != NULL && !typesCompatibles(type1, type2)) {
-        printf("Erreur semantique : incompatibilite de types pour l'addition entre expressions de types %s et %s a la ligne %d\n", 
-               type1, type2, nb_ligne);
-        nombre_erreurs_semantiques++;
-    }
-    ;}
-    break;
-
-  case 26:
-
-/* Line 1455 of yacc.c  */
-#line 289 "syntaxique.y"
+#line 252 "syntaxique.y"
     {
         (yyval.expr).nature = strdup("expression");
-    
-    // Déterminer le type de l'expression résultante
-    char *type1 = NULL, *type2 = NULL;
-    
-    // Obtenir le type de la première expression
-    if (strcmp((yyvsp[(1) - (3)].expr).nature, "idf") == 0) {
-        IdfConstTS* sym = rechercherIdfConst((yyvsp[(1) - (3)].expr).nom);
-        if (sym) type1 = sym->type;
-    } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "constante") == 0) {
-        type1 = "Int";
-    } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "reel") == 0) {
-        type1 = "Float";
-    } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "expression") == 0) {
-        // Supposons que le type est stocké d'une certaine manière
-        type1 = (yyvsp[(1) - (3)].expr).type;
-    }
-    
-    // Obtenir le type de la seconde expression
-    if (strcmp((yyvsp[(3) - (3)].expr).nature, "idf") == 0) {
-        IdfConstTS* sym = rechercherIdfConst((yyvsp[(3) - (3)].expr).nom);
-        if (sym) type2 = sym->type;
-    } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "constante") == 0) {
-        type2 = "Int";
-    } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "reel") == 0) {
-        type2 = "Float";
-    } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "expression") == 0) {
-        type2 = (yyvsp[(3) - (3)].expr).type;
-    }
-    
-    // Déterminer le type résultant (Float si l'une des expressions est Float)
-    if (type1 != NULL && type2 != NULL) {
-        if (strcmp(type1, "Float") == 0 || strcmp(type2, "Float") == 0) {
-            (yyval.expr).type = strdup("Float");
-        } else {
-            (yyval.expr).type = strdup("Int");
+
+        char *type1 = NULL, *type2 = NULL;
+
+        // Détermination des types pour la première expression
+        if (strcmp((yyvsp[(1) - (3)].expr).nature, "idf") == 0) {
+            IdfConstTS* sym = rechercherIdfConst((yyvsp[(1) - (3)].expr).nom);
+            if (sym) type1 = sym->type;
+        } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "constante") == 0) {
+            type1 = "Int";
+        } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "reel") == 0) {
+            type1 = "Float";
+        } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "expression") == 0) {
+            type1 = (yyvsp[(1) - (3)].expr).type;
         }
-    } else {
-        (yyval.expr).type = NULL;  // Type indéterminé
-    }
-    
-    // Calcul de la valeur si constantes
-    if ((strcmp((yyvsp[(1) - (3)].expr).nature, "constante") == 0 || strcmp((yyvsp[(1) - (3)].expr).nature, "reel") == 0) &&
-        (strcmp((yyvsp[(3) - (3)].expr).nature, "constante") == 0 || strcmp((yyvsp[(3) - (3)].expr).nature, "reel") == 0)) {
-        (yyval.expr).valeur = (yyvsp[(1) - (3)].expr).valeur + (yyvsp[(3) - (3)].expr).valeur;
-        char tempStr[20];
-        sprintf(tempStr, "%f", (yyval.expr).valeur);
-        (yyval.expr).nom = strdup(tempStr);
-    } else {
-        (yyval.expr).nom = strdup("expr");
-        (yyval.expr).valeur = 0;
-    }
-    
-    // Vérification de compatibilité pour l'addition
-    if (type1 != NULL && type2 != NULL && !typesCompatibles(type1, type2)) {
-        printf("Erreur semantique : incompatibilite de types pour l'addition entre expressions de types %s et %s a la ligne %d\n", 
-               type1, type2, nb_ligne);
-        nombre_erreurs_semantiques++;
-    }
+        
+        // Détermination des types pour la seconde expression
+        if (strcmp((yyvsp[(3) - (3)].expr).nature, "idf") == 0) {
+            IdfConstTS* sym = rechercherIdfConst((yyvsp[(3) - (3)].expr).nom);
+            if (sym) type2 = sym->type;
+        } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "constante") == 0) {
+            type2 = "Int";
+        } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "reel") == 0) {
+            type2 = "Float";
+        } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "expression") == 0) {
+            type2 = (yyvsp[(3) - (3)].expr).type;
+        }
+        
+        // Détermination du type résultant
+        if (type1 != NULL && type2 != NULL) {
+            if (strcmp(type1, "Float") == 0 || strcmp(type2, "Float") == 0) {
+                (yyval.expr).type = strdup("Float");
+            } else {
+                (yyval.expr).type = strdup("Int");
+            }
+        } else {
+            (yyval.expr).type = NULL;
+        }
+        
+        // Calcul et vérification des valeurs
+        if ((strcmp((yyvsp[(1) - (3)].expr).nature, "constante") == 0 || strcmp((yyvsp[(1) - (3)].expr).nature, "reel") == 0) &&
+            (strcmp((yyvsp[(3) - (3)].expr).nature, "constante") == 0 || strcmp((yyvsp[(3) - (3)].expr).nature, "reel") == 0)) {
+            (yyval.expr).valeur = (yyvsp[(1) - (3)].expr).valeur - (yyvsp[(3) - (3)].expr).valeur;  // Soustraction ici
+            
+            // Vérifier si le résultat est dans les limites pour le type déterminé
+            if ((yyval.expr).type != NULL && strcmp((yyval.expr).type, "Int") == 0) {
+                if ((yyval.expr).valeur < -32768 || (yyval.expr).valeur > 32767) {
+                    printf("Erreur semantique : le resultat de la soustraction (%f) est hors limite pour le type Int a la ligne %d\n", 
+                        (yyval.expr).valeur, nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+                // Si résultat fractionnaire pour type Int
+                if ((yyval.expr).valeur != (int)(yyval.expr).valeur) {
+                    printf("Erreur semantique : la soustraction produit une valeur avec partie fractionnaire (%f) pour un resultat de type Int a la ligne %d\n", 
+                        (yyval.expr).valeur, nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+            }
+            
+            char tempStr[20];
+            sprintf(tempStr, "%f", (yyval.expr).valeur);
+            (yyval.expr).nom = strdup(tempStr);
+        } else {
+            (yyval.expr).nom = strdup("expr");
+            (yyval.expr).valeur = 0;
+        }
+        
+        // Vérification de la compatibilité des types
+        if (type1 != NULL && type2 != NULL && !typesCompatibles(type1, type2)) {
+            printf("Erreur semantique : incompatibilite de types pour la soustraction entre expressions de types %s et %s a la ligne %d\n", 
+                type1, type2, nb_ligne);
+            nombre_erreurs_semantiques++;
+        }
     ;}
     break;
 
-  case 27:
+  case 19:
 
 /* Line 1455 of yacc.c  */
-#line 351 "syntaxique.y"
+#line 329 "syntaxique.y"
     {
-        // Vérification de division par zéro
+        (yyval.expr).nature = strdup("expression");
+
+        char *type1 = NULL, *type2 = NULL;
+
+        // Détermination des types pour la première expression
+        if (strcmp((yyvsp[(1) - (3)].expr).nature, "idf") == 0) {
+            IdfConstTS* sym = rechercherIdfConst((yyvsp[(1) - (3)].expr).nom);
+            if (sym) type1 = sym->type;
+        } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "constante") == 0) {
+            type1 = "Int";
+        } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "reel") == 0) {
+            type1 = "Float";
+        } else if (strcmp((yyvsp[(1) - (3)].expr).nature, "expression") == 0) {
+            type1 = (yyvsp[(1) - (3)].expr).type;
+        }
+        
+        // Détermination des types pour la seconde expression
+        if (strcmp((yyvsp[(3) - (3)].expr).nature, "idf") == 0) {
+            IdfConstTS* sym = rechercherIdfConst((yyvsp[(3) - (3)].expr).nom);
+            if (sym) type2 = sym->type;
+        } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "constante") == 0) {
+            type2 = "Int";
+        } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "reel") == 0) {
+            type2 = "Float";
+        } else if (strcmp((yyvsp[(3) - (3)].expr).nature, "expression") == 0) {
+            type2 = (yyvsp[(3) - (3)].expr).type;
+        }
+        
+        // Détermination du type résultant
+        if (type1 != NULL && type2 != NULL) {
+            if (strcmp(type1, "Float") == 0 || strcmp(type2, "Float") == 0) {
+                (yyval.expr).type = strdup("Float");
+            } else {
+                (yyval.expr).type = strdup("Int");
+            }
+        } else {
+            (yyval.expr).type = NULL;
+        }
+        
+        // Calcul et vérification des valeurs
+        if ((strcmp((yyvsp[(1) - (3)].expr).nature, "constante") == 0 || strcmp((yyvsp[(1) - (3)].expr).nature, "reel") == 0) &&
+            (strcmp((yyvsp[(3) - (3)].expr).nature, "constante") == 0 || strcmp((yyvsp[(3) - (3)].expr).nature, "reel") == 0)) {
+            (yyval.expr).valeur = (yyvsp[(1) - (3)].expr).valeur * (yyvsp[(3) - (3)].expr).valeur;  // Multiplication ici
+            
+            // Vérifier si le résultat est dans les limites pour le type déterminé
+            if ((yyval.expr).type != NULL && strcmp((yyval.expr).type, "Int") == 0) {
+                if ((yyval.expr).valeur < -32768 || (yyval.expr).valeur > 32767) {
+                    printf("Erreur semantique : le resultat de la multiplication (%f) est hors limite pour le type Int a la ligne %d\n", 
+                        (yyval.expr).valeur, nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+                // Si résultat fractionnaire pour type Int
+                if ((yyval.expr).valeur != (int)(yyval.expr).valeur) {
+                    printf("Erreur semantique : la multiplication produit une valeur avec partie fractionnaire (%f) pour un resultat de type Int a la ligne %d\n", 
+                        (yyval.expr).valeur, nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+            }
+            
+            char tempStr[20];
+            sprintf(tempStr, "%f", (yyval.expr).valeur);
+            (yyval.expr).nom = strdup(tempStr);
+        } else {
+            (yyval.expr).nom = strdup("expr");
+            (yyval.expr).valeur = 0;
+        }
+        
+        // Vérification de la compatibilité des types
+        if (type1 != NULL && type2 != NULL && !typesCompatibles(type1, type2)) {
+            printf("Erreur semantique : incompatibilite de types pour la multiplication entre expressions de types %s et %s a la ligne %d\n", 
+                type1, type2, nb_ligne);
+            nombre_erreurs_semantiques++;
+        }
+    ;}
+    break;
+
+  case 20:
+
+/* Line 1455 of yacc.c  */
+#line 405 "syntaxique.y"
+    {
+        
         if ((strcmp((yyvsp[(3) - (3)].expr).nature, "constante") == 0 || strcmp((yyvsp[(3) - (3)].expr).nature, "reel") == 0) && (yyvsp[(3) - (3)].expr).valeur == 0) {
             printf("Erreur semantique : division par zero a la ligne %d\n", nb_ligne);
             nombre_erreurs_semantiques++;
@@ -1875,7 +1899,7 @@ yyreduce:
         }
         
         (yyval.expr).nature = strdup("expression");
-        // Calcul de la valeur si constantes et pas de division par zéro
+        
         if ((strcmp((yyvsp[(1) - (3)].expr).nature, "constante") == 0 || strcmp((yyvsp[(1) - (3)].expr).nature, "reel") == 0) &&
             (strcmp((yyvsp[(3) - (3)].expr).nature, "constante") == 0 || strcmp((yyvsp[(3) - (3)].expr).nature, "reel") == 0) &&
             (yyvsp[(3) - (3)].expr).valeur != 0) {
@@ -1899,10 +1923,10 @@ yyreduce:
     ;}
     break;
 
-  case 28:
+  case 21:
 
 /* Line 1455 of yacc.c  */
-#line 389 "syntaxique.y"
+#line 443 "syntaxique.y"
     {
         (yyval.expr).nature = strdup((yyvsp[(2) - (3)].expr).nature);
         (yyval.expr).nom = strdup((yyvsp[(2) - (3)].expr).nom);
@@ -1910,53 +1934,47 @@ yyreduce:
     ;}
     break;
 
-  case 29:
+  case 22:
 
 /* Line 1455 of yacc.c  */
-#line 399 "syntaxique.y"
+#line 453 "syntaxique.y"
     {
         (yyval.type) = strdup("Int");
     ;}
     break;
 
-  case 30:
+  case 23:
 
 /* Line 1455 of yacc.c  */
-#line 403 "syntaxique.y"
+#line 457 "syntaxique.y"
     {
         (yyval.type) = strdup("Float");
     ;}
     break;
 
-  case 31:
+  case 24:
 
 /* Line 1455 of yacc.c  */
-#line 410 "syntaxique.y"
+#line 464 "syntaxique.y"
     {
-        // On doit traiter la liste d'identificateurs
+       
         char* token;
-        char* str = strdup((yyvsp[(2) - (5)].chaine));  // Faire une copie car strtok modifie la chaîne
-        
-        // Première découpe de la chaîne
+        char* str = strdup((yyvsp[(2) - (5)].chaine));  
         token = strtok(str, ",");
-        
         while (token != NULL) {
-            // Enlever les espaces éventuels
+           
             while (*token == ' ') token++;
             
-            // Rechercher l'identifiant dans la table
             IdfConstTS* sym = rechercherIdfConst(token);
             if (sym && sym->declared == 1) {
-                // L'identifiant est déja déclaré, c'est une erreur
                 printf("Erreur semantique : identifiant '%s' deja declare a la ligne %d\n", token, nb_ligne);
                 nombre_erreurs_semantiques++;
             } else if (sym) {
-                // L'identifiant existe mais n'est pas déclaré, le marquer comme déclaré
                 sym->declared = 1;
                 strcpy(sym->type, (yyvsp[(4) - (5)].type));
             }
             
-            // Passer au token suivant
+           
             token = strtok(NULL, ",");
         }
         
@@ -1964,21 +1982,59 @@ yyreduce:
     ;}
     break;
 
-  case 34:
+  case 25:
 
 /* Line 1455 of yacc.c  */
-#line 449 "syntaxique.y"
+#line 489 "syntaxique.y"
+    {
+        char* token;
+        char* str = strdup((yyvsp[(2) - (4)].chaine));  
+        token = strtok(str, ",");
+        while (token != NULL) {
+            while (*token == ' ') token++;
+            
+            IdfConstTS* sym = rechercherIdfConst(token);
+            if (sym && sym->declared == 1) {
+                printf("Erreur semantique : identifiant '%s' deja declare a la ligne %d\n", token, nb_ligne);
+                nombre_erreurs_semantiques++;
+            } else if (sym) {
+                sym->declared = 1;
+                strcpy(sym->type, (yyvsp[(4) - (4)].array_info).type);           // Type du tableau - Fixed!
+                sym->array_size = tableau_courant_taille;  // Taille du tableau
+            }
+            
+            token = strtok(NULL, ",");
+        }
+        
+        free(str);
+    ;}
+    break;
+
+  case 26:
+
+/* Line 1455 of yacc.c  */
+#line 515 "syntaxique.y"
+    {
+        tableau_courant_taille = (yyvsp[(4) - (6)].entier);  
+        (yyval.array_info).type = strdup((yyvsp[(2) - (6)].type));         
+        (yyval.array_info).size = tableau_courant_taille;  
+    ;}
+    break;
+
+  case 27:
+
+/* Line 1455 of yacc.c  */
+#line 525 "syntaxique.y"
     {
         (yyval.chaine) = (yyvsp[(1) - (1)].chaine);
     ;}
     break;
 
-  case 35:
+  case 28:
 
 /* Line 1455 of yacc.c  */
-#line 453 "syntaxique.y"
+#line 529 "syntaxique.y"
     {
-        // Traiter chaque identifiant séparément plutôt que de construire une chaîne
         IdfConstTS* sym = rechercherIdfConst((yyvsp[(1) - (3)].chaine));
         if (sym) {
             sym->declared = 1;
@@ -1989,17 +2045,46 @@ yyreduce:
             sym3->declared = 1;
         }
         
-        (yyval.chaine) = (yyvsp[(3) - (3)].chaine);  // On renvoie simplement le dernier identifiant
+        (yyval.chaine) = (yyvsp[(3) - (3)].chaine);  
     ;}
     break;
 
-  case 45:
+  case 29:
 
 /* Line 1455 of yacc.c  */
-#line 487 "syntaxique.y"
+#line 545 "syntaxique.y"
+    {
+        IdfConstTS* sym = rechercherIdfConst((yyvsp[(4) - (9)].chaine));
+        if (!sym) {
+            printf("Erreur : identifiant '%s' non trouvé ligne %d\n", (yyvsp[(4) - (9)].chaine), nb_ligne);
+            nombre_erreurs_semantiques++;
+        } else if (sym->declared == 1) {
+            printf("Erreur : '%s' déjà déclaré ligne %d\n", (yyvsp[(4) - (9)].chaine), nb_ligne);
+            nombre_erreurs_semantiques++;
+        }
+    ;}
+    break;
+
+  case 33:
+
+/* Line 1455 of yacc.c  */
+#line 564 "syntaxique.y"
+    {
+        IdfConstTS* sym = rechercherIdfConst((yyvsp[(3) - (5)].chaine));
+        if (!sym || sym->declared == 0) {
+          printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", (yyvsp[(3) - (5)].chaine), nb_ligne);
+          nombre_erreurs_semantiques++;
+        }
+    ;}
+    break;
+
+  case 35:
+
+/* Line 1455 of yacc.c  */
+#line 576 "syntaxique.y"
     {
         IdfConstTS* sym = rechercherIdfConst((yyvsp[(1) - (4)].chaine));
-        if (!sym) {
+       if(!sym || sym->declared == 0) { 
             printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", (yyvsp[(1) - (4)].chaine), nb_ligne);
             nombre_erreurs_semantiques++;
         } else {
@@ -2007,27 +2092,49 @@ yyreduce:
                 printf("Erreur semantique : tentative de modification de la constante '%s' a la ligne %d\n", (yyvsp[(1) - (4)].chaine), nb_ligne);
                 nombre_erreurs_semantiques++;
             } else {
-                // Déterminer le type de l'expression
                 char* exprType = NULL;
                 
                 if (strcmp((yyvsp[(3) - (4)].expr).nature, "constante") == 0) {
                     exprType = "Int";
+                    // Vérifier si la valeur est dans les limites acceptables pour le type
+                    if (strcmp(sym->type, "Int") == 0) {
+                        // Pour Int, vérifier si la valeur est entre -32768 et 32767
+                        if ((yyvsp[(3) - (4)].expr).valeur < -32768 || (yyvsp[(3) - (4)].expr).valeur > 32767) {
+                            printf("Erreur semantique : la valeur %f est hors limite pour le type Int a la ligne %d\n", 
+                                   (yyvsp[(3) - (4)].expr).valeur, nb_ligne);
+                            nombre_erreurs_semantiques++;
+                        }
+                    }
                 } 
                 else if (strcmp((yyvsp[(3) - (4)].expr).nature, "reel") == 0) {
                     exprType = "Float";
+                    if (strcmp(sym->type, "Int") == 0) {
+                        printf("Erreur semantique : incompatibilite de types - affectation d'un reel a '%s' de type Int a la ligne %d\n", 
+                               (yyvsp[(1) - (4)].chaine), nb_ligne);
+                        nombre_erreurs_semantiques++;
+                    }
                 } 
                 else if (strcmp((yyvsp[(3) - (4)].expr).nature, "idf") == 0) {
                     IdfConstTS* exprSym = rechercherIdfConst((yyvsp[(3) - (4)].expr).nom);
                     if (exprSym) {
                         exprType = exprSym->type;
+                        // Vérifier la compatibilité des valeurs si connues
+                        if (strcmp(sym->type, "Int") == 0 && strcmp(exprSym->type, "Float") == 0 && 
+                            strlen(exprSym->value) > 0) {
+                            float val = atof(exprSym->value);
+                            if (val != (int)val) {  // Si la valeur a une partie fractionnaire
+                                printf("Erreur semantique : incompatibilite de valeur - la valeur %f de '%s' a une partie fractionnaire et ne peut pas être affectée a '%s' de type Int a la ligne %d\n", 
+                                       val, exprSym->name, (yyvsp[(1) - (4)].chaine), nb_ligne);
+                                nombre_erreurs_semantiques++;
+                            }
+                        }
                     }
                 }
                 else if (strcmp((yyvsp[(3) - (4)].expr).nature, "expression") == 0 && (yyvsp[(3) - (4)].expr).type != NULL) {
-                    // Utiliser le type propagé depuis l'expression
                     exprType = (yyvsp[(3) - (4)].expr).type;
                 }
                 
-                // Vérifier la compatibilité des types
+                // Vérification générale de compatibilité de types
                 if (exprType != NULL) {
                     if (strcmp(sym->type, "Int") == 0 && strcmp(exprType, "Float") == 0) {
                         printf("Erreur semantique : incompatibilite de types - affectation d'une expression de type Float a '%s' de type Int a la ligne %d\n", 
@@ -2036,8 +2143,9 @@ yyreduce:
                     }
                 }
                 
-                // Mettre a jour la valeur dans la table des symboles si possible
-                if (strcmp((yyvsp[(3) - (4)].expr).nature, "constante") == 0 || strcmp((yyvsp[(3) - (4)].expr).nature, "reel") == 0) {
+                // Mise à jour de la valeur dans la table des symboles
+                if ((strcmp((yyvsp[(3) - (4)].expr).nature, "constante") == 0 || strcmp((yyvsp[(3) - (4)].expr).nature, "reel") == 0) && 
+                    !(strcmp(sym->type, "Int") == 0 && strcmp((yyvsp[(3) - (4)].expr).nature, "reel") == 0)) {
                     char tempValue[20];
                     sprintf(tempValue, "%f", (yyvsp[(3) - (4)].expr).valeur);
                     strcpy(sym->value, tempValue);
@@ -2045,28 +2153,74 @@ yyreduce:
                 else if (strcmp((yyvsp[(3) - (4)].expr).nature, "idf") == 0) {
                     IdfConstTS* exprSym = rechercherIdfConst((yyvsp[(3) - (4)].expr).nom);
                     if (exprSym && strlen(exprSym->value) > 0) {
-                        strcpy(sym->value, exprSym->value);
+                        // Pour Int, vérifier que la valeur est entière si source est Float
+                        if (strcmp(sym->type, "Int") == 0 && strcmp(exprSym->type, "Float") == 0) {
+                            float val = atof(exprSym->value);
+                            if (val == (int)val) {  // Si c'est un nombre entier
+                                sprintf(sym->value, "%d", (int)val);
+                            }
+                        } else {
+                            strcpy(sym->value, exprSym->value);
+                        }
                     } else {
-                        strcpy(sym->value, "");  // Valeur inconnue
+                        strcpy(sym->value, "");
                     }
                 } 
                 else {
-                    strcpy(sym->value, "");  // Expression complexe
+                    strcpy(sym->value, "");  
                 }
             }
         }
     ;}
     break;
 
-  case 46:
+  case 36:
 
 /* Line 1455 of yacc.c  */
-#line 547 "syntaxique.y"
+#line 674 "syntaxique.y"
     {
         IdfConstTS* sym = rechercherIdfConst((yyvsp[(1) - (7)].chaine));
         if (!sym) {
             printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", (yyvsp[(1) - (7)].chaine), nb_ligne);
             nombre_erreurs_semantiques++;
+        } else if (sym->array_size <= 0) {
+            printf("Erreur semantique : '%s' n'est pas un tableau a la ligne %d\n", (yyvsp[(1) - (7)].chaine), nb_ligne);
+            nombre_erreurs_semantiques++;
+        } else {
+            // Vérification de l'indice
+            if (strcmp((yyvsp[(3) - (7)].expr).nature, "constante") == 0 && 
+                ((yyvsp[(3) - (7)].expr).valeur < 0 || (yyvsp[(3) - (7)].expr).valeur >= sym->array_size)) {
+                printf("Erreur semantique : indice %d hors limites pour '%s' (taille %d) ligne %d\n", 
+                      (int)(yyvsp[(3) - (7)].expr).valeur, (yyvsp[(1) - (7)].chaine), sym->array_size, nb_ligne);
+                nombre_erreurs_semantiques++;
+            }
+            char* exprType = NULL;
+            if (strcmp((yyvsp[(6) - (7)].expr).nature, "constante") == 0) exprType = "Int";
+            else if (strcmp((yyvsp[(6) - (7)].expr).nature, "reel") == 0) exprType = "Float";
+            else if (strcmp((yyvsp[(6) - (7)].expr).nature, "idf") == 0) {
+                IdfConstTS* exprSym = rechercherIdfConst((yyvsp[(6) - (7)].expr).nom);
+                if (exprSym) exprType = exprSym->type;
+            }
+            else if (strcmp((yyvsp[(6) - (7)].expr).nature, "expression") == 0) exprType = (yyvsp[(6) - (7)].expr).type;
+            else if (strcmp((yyvsp[(6) - (7)].expr).nature, "chaine") == 0) exprType = "String";
+            if (exprType) {
+                char* arrayType = sym->type;
+                if (strcmp(arrayType, "Int") == 0) {
+                    if (strcmp(exprType, "String") == 0) {
+                        printf("Erreur : chaine -> Int pour '%s' ligne %d\n", (yyvsp[(1) - (7)].chaine), nb_ligne);
+                        nombre_erreurs_semantiques++;
+                    }
+                    else if (strcmp(exprType, "Float") == 0) {
+                        printf("Erreur : Float -> Int pour '%s' ligne %d\n",
+                               (yyvsp[(1) - (7)].chaine), nb_ligne);
+                        nombre_erreurs_semantiques++;
+                    }
+                }
+                else if (strcmp(arrayType, "Float") == 0 && strcmp(exprType, "String") == 0) {
+                    printf("Erreur : chaine -> Float pour '%s' ligne %d\n", (yyvsp[(1) - (7)].chaine), nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+            }
         }
     ;}
     break;
@@ -2074,7 +2228,7 @@ yyreduce:
 
 
 /* Line 1455 of yacc.c  */
-#line 2078 "syntaxique.tab.c"
+#line 2232 "syntaxique.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2286,7 +2440,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 566 "syntaxique.y"
+#line 731 "syntaxique.y"
 
 int main ()
 {

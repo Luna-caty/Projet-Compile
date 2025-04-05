@@ -150,7 +150,7 @@ commentLignes "{--"(.|\n)*"--}"
     if(!rechercherMcSep(yytext)) {
         insererMcSep(yytext, "Mot cle", 1);
     }
-    return constante; 
+    return Const; 
 }
 
 

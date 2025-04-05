@@ -914,7 +914,7 @@ YY_RULE_SETUP
     if(!rechercherMcSep(yytext)) {
         insererMcSep(yytext, "Mot cle", 1);
     }
-    return constante; 
+    return Const; 
 }
 	YY_BREAK
 case 22:

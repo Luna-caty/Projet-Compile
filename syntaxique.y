@@ -7,25 +7,32 @@ extern int nb_ligne;
 extern int col;
 extern int yylex();  
 int nombre_erreurs_semantiques = 0;
+int tableau_courant_taille = 0;
 
 void yyerror(const char *msg);
 int yywrap();
 %}
 
 
+
 %union {
     int entier;
     float reel;
     char* chaine;
-    char* type; // pour les types
+    char* type; 
     struct {
-        char* nature;  // "int", "float", "idf", "constante", "reel", "expression", etc.
-        float valeur;  // valeur si connue (0 par défaut pour idf)
-        char* nom;     // utile pour IDF : nom de la variable
-        char*type;
+        char* nature;
+        float valeur;
+        char* nom;     
+        char* type;
     } expr;
+    struct {
+        char* type;
+        int size;
+    } array_info;
 }
 %type <expr> expression
+%type <array_info> declaration_tableau
 %type <chaine> liste_idf
 %type <type> type
 
@@ -41,7 +48,8 @@ int yywrap();
 %token <chaine> par_ouv par_fer
 %token <chaine> crochet_ouv crochet_fer
 
-
+%nonassoc THEN
+%nonassoc ELSE
 
 
 
@@ -68,18 +76,6 @@ instruction:
   | condition
   | boucle
 ;
-
-op_cmp:
-    inf_egal
-    | sup_egal
-    | inf
-    | sup
-    | egal
-    | not_egal
-;
-
-
-
 instructions:
     instruction
   | instructions instruction
@@ -92,8 +88,8 @@ expression:
     {
         IdfConstTS* symbole = rechercherIdfConst($1);
         if (!symbole || symbole->declared == 0) {
-        printf("Erreur semantique : identifiant '%s' non declaree a la ligne %d\n", $1, nb_ligne);
-        nombre_erreurs_semantiques++;
+            printf("Erreur semantique : identifiant '%s' non declaree a la ligne %d\n", $1, nb_ligne);
+            nombre_erreurs_semantiques++;
         }
         $$.nature = strdup("idf");
         $$.nom = strdup($1);
@@ -127,17 +123,35 @@ expression:
     }
     | IDF crochet_ouv expression crochet_fer
     {
+        IdfConstTS* symbole = rechercherIdfConst($1);
+        if (!symbole || symbole->declared == 0) {
+            printf("Erreur semantique : identifiant '%s' non declaree a la ligne %d\n", $1, nb_ligne);
+            nombre_erreurs_semantiques++;
+        } else if (symbole->array_size <= 0) {
+            printf("Erreur semantique : '%s' n'est pas un tableau a la ligne %d\n", $1, nb_ligne);
+            nombre_erreurs_semantiques++;
+        } else {
+            // Vérifier si l'indice est une constante
+            if (strcmp($3.nature, "constante") == 0) {
+                if ($3.valeur < 0 || $3.valeur >= symbole->array_size) {
+                    printf("Erreur semantique : indice %d hors limites pour le tableau '%s' de taille %d a la ligne %d\n", 
+                        (int)$3.valeur, $1, symbole->array_size, nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+            }
+        }
+        
         $$.nature = strdup("tableau_elem");
         $$.nom = strdup($1);
         $$.valeur = 0;
+        
+        // Récupérer le type de l'élément du tableau
+        if (symbole) {
+            $$.type = strdup(symbole->type);
+        } else {
+            $$.type = NULL;
+        }
     } 
-    | expression op_cmp expression
-    {
-        $$.nature = strdup("condition");
-        $$.nom = strdup("condition");
-        $$.valeur = 0;
-
-    }
     | par_ouv expression AND expression par_fer
     {
         $$.nature = strdup("logique");
@@ -157,199 +171,239 @@ expression:
         $$.valeur = 0; 
     }
     | expression add expression
-{
-    $$.nature = strdup("expression");
-    
-    // Déterminer le type de l'expression résultante
-    char *type1 = NULL, *type2 = NULL;
-    
-    // Obtenir le type de la première expression
-    if (strcmp($1.nature, "idf") == 0) {
-        IdfConstTS* sym = rechercherIdfConst($1.nom);
-        if (sym) type1 = sym->type;
-    } else if (strcmp($1.nature, "constante") == 0) {
-        type1 = "Int";
-    } else if (strcmp($1.nature, "reel") == 0) {
-        type1 = "Float";
-    } else if (strcmp($1.nature, "expression") == 0) {
-        // Supposons que le type est stocké d'une certaine manière
-        type1 = $1.type;
-    }
-    
-    // Obtenir le type de la seconde expression
-    if (strcmp($3.nature, "idf") == 0) {
-        IdfConstTS* sym = rechercherIdfConst($3.nom);
-        if (sym) type2 = sym->type;
-    } else if (strcmp($3.nature, "constante") == 0) {
-        type2 = "Int";
-    } else if (strcmp($3.nature, "reel") == 0) {
-        type2 = "Float";
-    } else if (strcmp($3.nature, "expression") == 0) {
-        type2 = $3.type;
-    }
-    
-    // Déterminer le type résultant (Float si l'une des expressions est Float)
-    if (type1 != NULL && type2 != NULL) {
-        if (strcmp(type1, "Float") == 0 || strcmp(type2, "Float") == 0) {
-            $$.type = strdup("Float");
-        } else {
-            $$.type = strdup("Int");
+    {
+     $$.nature = strdup("expression");
+
+        char *type1 = NULL, *type2 = NULL;
+
+        // Détermination des types pour la première expression
+        if (strcmp($1.nature, "idf") == 0) {
+            IdfConstTS* sym = rechercherIdfConst($1.nom);
+            if (sym) type1 = sym->type;
+        } else if (strcmp($1.nature, "constante") == 0) {
+            type1 = "Int";
+        } else if (strcmp($1.nature, "reel") == 0) {
+            type1 = "Float";
+        } else if (strcmp($1.nature, "expression") == 0) {
+            type1 = $1.type;
         }
-    } else {
-        $$.type = NULL;  // Type indéterminé
-    }
-    
-    // Calcul de la valeur si constantes
-    if ((strcmp($1.nature, "constante") == 0 || strcmp($1.nature, "reel") == 0) &&
-        (strcmp($3.nature, "constante") == 0 || strcmp($3.nature, "reel") == 0)) {
-        $$.valeur = $1.valeur + $3.valeur;
-        char tempStr[20];
-        sprintf(tempStr, "%f", $$.valeur);
-        $$.nom = strdup(tempStr);
-    } else {
-        $$.nom = strdup("expr");
-        $$.valeur = 0;
-    }
-    
-    // Vérification de compatibilité pour l'addition
-    if (type1 != NULL && type2 != NULL && !typesCompatibles(type1, type2)) {
-        printf("Erreur semantique : incompatibilite de types pour l'addition entre expressions de types %s et %s a la ligne %d\n", 
-               type1, type2, nb_ligne);
-        nombre_erreurs_semantiques++;
-    }
+        
+        // Détermination des types pour la seconde expression
+        if (strcmp($3.nature, "idf") == 0) {
+            IdfConstTS* sym = rechercherIdfConst($3.nom);
+            if (sym) type2 = sym->type;
+        } else if (strcmp($3.nature, "constante") == 0) {
+            type2 = "Int";
+        } else if (strcmp($3.nature, "reel") == 0) {
+            type2 = "Float";
+        } else if (strcmp($3.nature, "expression") == 0) {
+            type2 = $3.type;
+        }
+        
+        // Détermination du type résultant
+        if (type1 != NULL && type2 != NULL) {
+            if (strcmp(type1, "Float") == 0 || strcmp(type2, "Float") == 0) {
+                $$.type = strdup("Float");
+            } else {
+                $$.type = strdup("Int");
+            }
+        } else {
+            $$.type = NULL;
+        }
+        
+        // Calcul et vérification des valeurs
+        if ((strcmp($1.nature, "constante") == 0 || strcmp($1.nature, "reel") == 0) &&
+            (strcmp($3.nature, "constante") == 0 || strcmp($3.nature, "reel") == 0)) {
+            $$.valeur = $1.valeur + $3.valeur;
+            
+            // Vérifier si le résultat est dans les limites pour le type déterminé
+            if ($$.type != NULL && strcmp($$.type, "Int") == 0) {
+                if ($$.valeur < -32768 || $$.valeur > 32767) {
+                    printf("Erreur semantique : le resultat de l'addition (%f) est hors limite pour le type Int a la ligne %d\n", 
+                        $$.valeur, nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+                // Si résultat fractionnaire pour type Int
+                if ($$.valeur != (int)$$.valeur) {
+                    printf("Erreur semantique : l'addition produit une valeur avec partie fractionnaire (%f) pour un resultat de type Int a la ligne %d\n", 
+                        $$.valeur, nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+            }
+            
+            char tempStr[20];
+            sprintf(tempStr, "%f", $$.valeur);
+            $$.nom = strdup(tempStr);
+        } else {
+            $$.nom = strdup("expr");
+            $$.valeur = 0;
+        }
+        
+        // Vérification de la compatibilité des types
+        if (type1 != NULL && type2 != NULL && !typesCompatibles(type1, type2)) {
+            printf("Erreur semantique : incompatibilite de types pour l'addition entre expressions de types %s et %s a la ligne %d\n", 
+                type1, type2, nb_ligne);
+            nombre_erreurs_semantiques++;
+        }
     }
     
     
     | expression sous expression
     {
-    $$.nature = strdup("expression");
-    
-    // Déterminer le type de l'expression résultante
-    char *type1 = NULL, *type2 = NULL;
-    
-    // Obtenir le type de la première expression
-    if (strcmp($1.nature, "idf") == 0) {
-        IdfConstTS* sym = rechercherIdfConst($1.nom);
-        if (sym) type1 = sym->type;
-    } else if (strcmp($1.nature, "constante") == 0) {
-        type1 = "Int";
-    } else if (strcmp($1.nature, "reel") == 0) {
-        type1 = "Float";
-    } else if (strcmp($1.nature, "expression") == 0) {
-        // Supposons que le type est stocké d'une certaine manière
-        type1 = $1.type;
-    }
-    
-    // Obtenir le type de la seconde expression
-    if (strcmp($3.nature, "idf") == 0) {
-        IdfConstTS* sym = rechercherIdfConst($3.nom);
-        if (sym) type2 = sym->type;
-    } else if (strcmp($3.nature, "constante") == 0) {
-        type2 = "Int";
-    } else if (strcmp($3.nature, "reel") == 0) {
-        type2 = "Float";
-    } else if (strcmp($3.nature, "expression") == 0) {
-        type2 = $3.type;
-    }
-    
-    // Déterminer le type résultant (Float si l'une des expressions est Float)
-    if (type1 != NULL && type2 != NULL) {
-        if (strcmp(type1, "Float") == 0 || strcmp(type2, "Float") == 0) {
-            $$.type = strdup("Float");
-        } else {
-            $$.type = strdup("Int");
+        $$.nature = strdup("expression");
+
+        char *type1 = NULL, *type2 = NULL;
+
+        // Détermination des types pour la première expression
+        if (strcmp($1.nature, "idf") == 0) {
+            IdfConstTS* sym = rechercherIdfConst($1.nom);
+            if (sym) type1 = sym->type;
+        } else if (strcmp($1.nature, "constante") == 0) {
+            type1 = "Int";
+        } else if (strcmp($1.nature, "reel") == 0) {
+            type1 = "Float";
+        } else if (strcmp($1.nature, "expression") == 0) {
+            type1 = $1.type;
         }
-    } else {
-        $$.type = NULL;  // Type indéterminé
+        
+        // Détermination des types pour la seconde expression
+        if (strcmp($3.nature, "idf") == 0) {
+            IdfConstTS* sym = rechercherIdfConst($3.nom);
+            if (sym) type2 = sym->type;
+        } else if (strcmp($3.nature, "constante") == 0) {
+            type2 = "Int";
+        } else if (strcmp($3.nature, "reel") == 0) {
+            type2 = "Float";
+        } else if (strcmp($3.nature, "expression") == 0) {
+            type2 = $3.type;
+        }
+        
+        // Détermination du type résultant
+        if (type1 != NULL && type2 != NULL) {
+            if (strcmp(type1, "Float") == 0 || strcmp(type2, "Float") == 0) {
+                $$.type = strdup("Float");
+            } else {
+                $$.type = strdup("Int");
+            }
+        } else {
+            $$.type = NULL;
+        }
+        
+        // Calcul et vérification des valeurs
+        if ((strcmp($1.nature, "constante") == 0 || strcmp($1.nature, "reel") == 0) &&
+            (strcmp($3.nature, "constante") == 0 || strcmp($3.nature, "reel") == 0)) {
+            $$.valeur = $1.valeur - $3.valeur;  // Soustraction ici
+            
+            // Vérifier si le résultat est dans les limites pour le type déterminé
+            if ($$.type != NULL && strcmp($$.type, "Int") == 0) {
+                if ($$.valeur < -32768 || $$.valeur > 32767) {
+                    printf("Erreur semantique : le resultat de la soustraction (%f) est hors limite pour le type Int a la ligne %d\n", 
+                        $$.valeur, nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+                // Si résultat fractionnaire pour type Int
+                if ($$.valeur != (int)$$.valeur) {
+                    printf("Erreur semantique : la soustraction produit une valeur avec partie fractionnaire (%f) pour un resultat de type Int a la ligne %d\n", 
+                        $$.valeur, nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+            }
+            
+            char tempStr[20];
+            sprintf(tempStr, "%f", $$.valeur);
+            $$.nom = strdup(tempStr);
+        } else {
+            $$.nom = strdup("expr");
+            $$.valeur = 0;
+        }
+        
+        // Vérification de la compatibilité des types
+        if (type1 != NULL && type2 != NULL && !typesCompatibles(type1, type2)) {
+            printf("Erreur semantique : incompatibilite de types pour la soustraction entre expressions de types %s et %s a la ligne %d\n", 
+                type1, type2, nb_ligne);
+            nombre_erreurs_semantiques++;
+        }
     }
-    
-    // Calcul de la valeur si constantes
-    if ((strcmp($1.nature, "constante") == 0 || strcmp($1.nature, "reel") == 0) &&
-        (strcmp($3.nature, "constante") == 0 || strcmp($3.nature, "reel") == 0)) {
-        $$.valeur = $1.valeur + $3.valeur;
-        char tempStr[20];
-        sprintf(tempStr, "%f", $$.valeur);
-        $$.nom = strdup(tempStr);
-    } else {
-        $$.nom = strdup("expr");
-        $$.valeur = 0;
-    }
-    
-    // Vérification de compatibilité pour l'addition
-    if (type1 != NULL && type2 != NULL && !typesCompatibles(type1, type2)) {
-        printf("Erreur semantique : incompatibilite de types pour l'addition entre expressions de types %s et %s a la ligne %d\n", 
-               type1, type2, nb_ligne);
-        nombre_erreurs_semantiques++;
-    }
-    }
-    
-    
     
     | expression mult expression
     {
         $$.nature = strdup("expression");
-    
-    // Déterminer le type de l'expression résultante
-    char *type1 = NULL, *type2 = NULL;
-    
-    // Obtenir le type de la première expression
-    if (strcmp($1.nature, "idf") == 0) {
-        IdfConstTS* sym = rechercherIdfConst($1.nom);
-        if (sym) type1 = sym->type;
-    } else if (strcmp($1.nature, "constante") == 0) {
-        type1 = "Int";
-    } else if (strcmp($1.nature, "reel") == 0) {
-        type1 = "Float";
-    } else if (strcmp($1.nature, "expression") == 0) {
-        // Supposons que le type est stocké d'une certaine manière
-        type1 = $1.type;
-    }
-    
-    // Obtenir le type de la seconde expression
-    if (strcmp($3.nature, "idf") == 0) {
-        IdfConstTS* sym = rechercherIdfConst($3.nom);
-        if (sym) type2 = sym->type;
-    } else if (strcmp($3.nature, "constante") == 0) {
-        type2 = "Int";
-    } else if (strcmp($3.nature, "reel") == 0) {
-        type2 = "Float";
-    } else if (strcmp($3.nature, "expression") == 0) {
-        type2 = $3.type;
-    }
-    
-    // Déterminer le type résultant (Float si l'une des expressions est Float)
-    if (type1 != NULL && type2 != NULL) {
-        if (strcmp(type1, "Float") == 0 || strcmp(type2, "Float") == 0) {
-            $$.type = strdup("Float");
-        } else {
-            $$.type = strdup("Int");
+
+        char *type1 = NULL, *type2 = NULL;
+
+        // Détermination des types pour la première expression
+        if (strcmp($1.nature, "idf") == 0) {
+            IdfConstTS* sym = rechercherIdfConst($1.nom);
+            if (sym) type1 = sym->type;
+        } else if (strcmp($1.nature, "constante") == 0) {
+            type1 = "Int";
+        } else if (strcmp($1.nature, "reel") == 0) {
+            type1 = "Float";
+        } else if (strcmp($1.nature, "expression") == 0) {
+            type1 = $1.type;
         }
-    } else {
-        $$.type = NULL;  // Type indéterminé
-    }
-    
-    // Calcul de la valeur si constantes
-    if ((strcmp($1.nature, "constante") == 0 || strcmp($1.nature, "reel") == 0) &&
-        (strcmp($3.nature, "constante") == 0 || strcmp($3.nature, "reel") == 0)) {
-        $$.valeur = $1.valeur + $3.valeur;
-        char tempStr[20];
-        sprintf(tempStr, "%f", $$.valeur);
-        $$.nom = strdup(tempStr);
-    } else {
-        $$.nom = strdup("expr");
-        $$.valeur = 0;
-    }
-    
-    // Vérification de compatibilité pour l'addition
-    if (type1 != NULL && type2 != NULL && !typesCompatibles(type1, type2)) {
-        printf("Erreur semantique : incompatibilite de types pour l'addition entre expressions de types %s et %s a la ligne %d\n", 
-               type1, type2, nb_ligne);
-        nombre_erreurs_semantiques++;
-    }
+        
+        // Détermination des types pour la seconde expression
+        if (strcmp($3.nature, "idf") == 0) {
+            IdfConstTS* sym = rechercherIdfConst($3.nom);
+            if (sym) type2 = sym->type;
+        } else if (strcmp($3.nature, "constante") == 0) {
+            type2 = "Int";
+        } else if (strcmp($3.nature, "reel") == 0) {
+            type2 = "Float";
+        } else if (strcmp($3.nature, "expression") == 0) {
+            type2 = $3.type;
+        }
+        
+        // Détermination du type résultant
+        if (type1 != NULL && type2 != NULL) {
+            if (strcmp(type1, "Float") == 0 || strcmp(type2, "Float") == 0) {
+                $$.type = strdup("Float");
+            } else {
+                $$.type = strdup("Int");
+            }
+        } else {
+            $$.type = NULL;
+        }
+        
+        // Calcul et vérification des valeurs
+        if ((strcmp($1.nature, "constante") == 0 || strcmp($1.nature, "reel") == 0) &&
+            (strcmp($3.nature, "constante") == 0 || strcmp($3.nature, "reel") == 0)) {
+            $$.valeur = $1.valeur * $3.valeur;  // Multiplication ici
+            
+            // Vérifier si le résultat est dans les limites pour le type déterminé
+            if ($$.type != NULL && strcmp($$.type, "Int") == 0) {
+                if ($$.valeur < -32768 || $$.valeur > 32767) {
+                    printf("Erreur semantique : le resultat de la multiplication (%f) est hors limite pour le type Int a la ligne %d\n", 
+                        $$.valeur, nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+                // Si résultat fractionnaire pour type Int
+                if ($$.valeur != (int)$$.valeur) {
+                    printf("Erreur semantique : la multiplication produit une valeur avec partie fractionnaire (%f) pour un resultat de type Int a la ligne %d\n", 
+                        $$.valeur, nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+            }
+            
+            char tempStr[20];
+            sprintf(tempStr, "%f", $$.valeur);
+            $$.nom = strdup(tempStr);
+        } else {
+            $$.nom = strdup("expr");
+            $$.valeur = 0;
+        }
+        
+        // Vérification de la compatibilité des types
+        if (type1 != NULL && type2 != NULL && !typesCompatibles(type1, type2)) {
+            printf("Erreur semantique : incompatibilite de types pour la multiplication entre expressions de types %s et %s a la ligne %d\n", 
+                type1, type2, nb_ligne);
+            nombre_erreurs_semantiques++;
+        }
     }
     | expression division expression
     {
-        // Vérification de division par zéro
+        
         if ((strcmp($3.nature, "constante") == 0 || strcmp($3.nature, "reel") == 0) && $3.valeur == 0) {
             printf("Erreur semantique : division par zero a la ligne %d\n", nb_ligne);
             nombre_erreurs_semantiques++;
@@ -363,7 +417,7 @@ expression:
         }
         
         $$.nature = strdup("expression");
-        // Calcul de la valeur si constantes et pas de division par zéro
+        
         if ((strcmp($1.nature, "constante") == 0 || strcmp($1.nature, "reel") == 0) &&
             (strcmp($3.nature, "constante") == 0 || strcmp($3.nature, "reel") == 0) &&
             $3.valeur != 0) {
@@ -408,40 +462,62 @@ type:
 declaration:
     let liste_idf separ_dec type pvg 
     {
-        // On doit traiter la liste d'identificateurs
+       
         char* token;
-        char* str = strdup($2);  // Faire une copie car strtok modifie la chaîne
-        
-        // Première découpe de la chaîne
+        char* str = strdup($2);  
         token = strtok(str, ",");
-        
         while (token != NULL) {
-            // Enlever les espaces éventuels
+           
             while (*token == ' ') token++;
             
-            // Rechercher l'identifiant dans la table
             IdfConstTS* sym = rechercherIdfConst(token);
             if (sym && sym->declared == 1) {
-                // L'identifiant est déja déclaré, c'est une erreur
                 printf("Erreur semantique : identifiant '%s' deja declare a la ligne %d\n", token, nb_ligne);
                 nombre_erreurs_semantiques++;
             } else if (sym) {
-                // L'identifiant existe mais n'est pas déclaré, le marquer comme déclaré
                 sym->declared = 1;
                 strcpy(sym->type, $4);
             }
             
-            // Passer au token suivant
+           
             token = strtok(NULL, ",");
         }
         
         free(str);
     }
-  | let liste_idf separ_dec declaration_tableau 
+ | let liste_idf separ_dec declaration_tableau 
+    {
+        char* token;
+        char* str = strdup($2);  
+        token = strtok(str, ",");
+        while (token != NULL) {
+            while (*token == ' ') token++;
+            
+            IdfConstTS* sym = rechercherIdfConst(token);
+            if (sym && sym->declared == 1) {
+                printf("Erreur semantique : identifiant '%s' deja declare a la ligne %d\n", token, nb_ligne);
+                nombre_erreurs_semantiques++;
+            } else if (sym) {
+                sym->declared = 1;
+                strcpy(sym->type, $4.type);           // Type du tableau - Fixed!
+                sym->array_size = tableau_courant_taille;  // Taille du tableau
+            }
+            
+            token = strtok(NULL, ",");
+        }
+        
+        free(str);
+    }
 ;
 
 declaration_tableau:
     crochet_ouv type pvg constante crochet_fer pvg
+    {
+        tableau_courant_taille = $4;  
+        $$.type = strdup($2);         
+        $$.size = tableau_courant_taille;  
+    }
+
 ;
 
 liste_idf:
@@ -451,7 +527,6 @@ liste_idf:
     }
     | liste_idf vg IDF
     {
-        // Traiter chaque identifiant séparément plutôt que de construire une chaîne
         IdfConstTS* sym = rechercherIdfConst($1);
         if (sym) {
             sym->declared = 1;
@@ -462,23 +537,37 @@ liste_idf:
             sym3->declared = 1;
         }
         
-        $$ = $3;  // On renvoie simplement le dernier identifiant
+        $$ = $3;  
     }
 ;
 const_declaration:
     at_sign define Const IDF separ_dec type affect_val constante pvg
+    {
+        IdfConstTS* sym = rechercherIdfConst($4);
+        if (!sym) {
+            printf("Erreur : identifiant '%s' non trouvé ligne %d\n", $4, nb_ligne);
+            nombre_erreurs_semantiques++;
+        } else if (sym->declared == 1) {
+            printf("Erreur : '%s' déjà déclaré ligne %d\n", $4, nb_ligne);
+            nombre_erreurs_semantiques++;
+        }
+    }
 ;
-declarations:
-    declaration
-  | const_declaration   
-  | declarations declaration
-  | declarations const_declaration
-  | /* vide */
+declarations: 
+    /* vide */ 
+    | declaration declarations
+    | const_declaration declarations
 ;
 
 inOut:
     input_var par_ouv IDF par_fer pvg
-    | output_var par_ouv expression par_fer pvg
+    {
+        IdfConstTS* sym = rechercherIdfConst($3);
+        if (!sym || sym->declared == 0) {
+          printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", $3, nb_ligne);
+          nombre_erreurs_semantiques++;
+        }
+    }
     | output_var par_ouv chaine par_fer pvg
 ;
 
@@ -486,7 +575,7 @@ affectation:
     IDF aff expression pvg
     {
         IdfConstTS* sym = rechercherIdfConst($1);
-        if (!sym) {
+       if(!sym || sym->declared == 0) { 
             printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", $1, nb_ligne);
             nombre_erreurs_semantiques++;
         } else {
@@ -494,27 +583,49 @@ affectation:
                 printf("Erreur semantique : tentative de modification de la constante '%s' a la ligne %d\n", $1, nb_ligne);
                 nombre_erreurs_semantiques++;
             } else {
-                // Déterminer le type de l'expression
                 char* exprType = NULL;
                 
                 if (strcmp($3.nature, "constante") == 0) {
                     exprType = "Int";
+                    // Vérifier si la valeur est dans les limites acceptables pour le type
+                    if (strcmp(sym->type, "Int") == 0) {
+                        // Pour Int, vérifier si la valeur est entre -32768 et 32767
+                        if ($3.valeur < -32768 || $3.valeur > 32767) {
+                            printf("Erreur semantique : la valeur %f est hors limite pour le type Int a la ligne %d\n", 
+                                   $3.valeur, nb_ligne);
+                            nombre_erreurs_semantiques++;
+                        }
+                    }
                 } 
                 else if (strcmp($3.nature, "reel") == 0) {
                     exprType = "Float";
+                    if (strcmp(sym->type, "Int") == 0) {
+                        printf("Erreur semantique : incompatibilite de types - affectation d'un reel a '%s' de type Int a la ligne %d\n", 
+                               $1, nb_ligne);
+                        nombre_erreurs_semantiques++;
+                    }
                 } 
                 else if (strcmp($3.nature, "idf") == 0) {
                     IdfConstTS* exprSym = rechercherIdfConst($3.nom);
                     if (exprSym) {
                         exprType = exprSym->type;
+                        // Vérifier la compatibilité des valeurs si connues
+                        if (strcmp(sym->type, "Int") == 0 && strcmp(exprSym->type, "Float") == 0 && 
+                            strlen(exprSym->value) > 0) {
+                            float val = atof(exprSym->value);
+                            if (val != (int)val) {  // Si la valeur a une partie fractionnaire
+                                printf("Erreur semantique : incompatibilite de valeur - la valeur %f de '%s' a une partie fractionnaire et ne peut pas être affectée a '%s' de type Int a la ligne %d\n", 
+                                       val, exprSym->name, $1, nb_ligne);
+                                nombre_erreurs_semantiques++;
+                            }
+                        }
                     }
                 }
                 else if (strcmp($3.nature, "expression") == 0 && $3.type != NULL) {
-                    // Utiliser le type propagé depuis l'expression
                     exprType = $3.type;
                 }
                 
-                // Vérifier la compatibilité des types
+                // Vérification générale de compatibilité de types
                 if (exprType != NULL) {
                     if (strcmp(sym->type, "Int") == 0 && strcmp(exprType, "Float") == 0) {
                         printf("Erreur semantique : incompatibilite de types - affectation d'une expression de type Float a '%s' de type Int a la ligne %d\n", 
@@ -523,8 +634,9 @@ affectation:
                     }
                 }
                 
-                // Mettre a jour la valeur dans la table des symboles si possible
-                if (strcmp($3.nature, "constante") == 0 || strcmp($3.nature, "reel") == 0) {
+                // Mise à jour de la valeur dans la table des symboles
+                if ((strcmp($3.nature, "constante") == 0 || strcmp($3.nature, "reel") == 0) && 
+                    !(strcmp(sym->type, "Int") == 0 && strcmp($3.nature, "reel") == 0)) {
                     char tempValue[20];
                     sprintf(tempValue, "%f", $3.valeur);
                     strcpy(sym->value, tempValue);
@@ -532,23 +644,76 @@ affectation:
                 else if (strcmp($3.nature, "idf") == 0) {
                     IdfConstTS* exprSym = rechercherIdfConst($3.nom);
                     if (exprSym && strlen(exprSym->value) > 0) {
-                        strcpy(sym->value, exprSym->value);
+                        // Pour Int, vérifier que la valeur est entière si source est Float
+                        if (strcmp(sym->type, "Int") == 0 && strcmp(exprSym->type, "Float") == 0) {
+                            float val = atof(exprSym->value);
+                            if (val == (int)val) {  // Si c'est un nombre entier
+                                sprintf(sym->value, "%d", (int)val);
+                            }
+                        } else {
+                            strcpy(sym->value, exprSym->value);
+                        }
                     } else {
-                        strcpy(sym->value, "");  // Valeur inconnue
+                        strcpy(sym->value, "");
                     }
                 } 
                 else {
-                    strcpy(sym->value, "");  // Expression complexe
+                    strcpy(sym->value, "");  
                 }
             }
         }
     }
+
+
+
+
+
+
+    // pour gérer l'incompatibilité de types lors de l'affectation d'une expression à un tableau
     | IDF crochet_ouv expression crochet_fer aff expression pvg
     {
         IdfConstTS* sym = rechercherIdfConst($1);
         if (!sym) {
             printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", $1, nb_ligne);
             nombre_erreurs_semantiques++;
+        } else if (sym->array_size <= 0) {
+            printf("Erreur semantique : '%s' n'est pas un tableau a la ligne %d\n", $1, nb_ligne);
+            nombre_erreurs_semantiques++;
+        } else {
+            // Vérification de l'indice
+            if (strcmp($3.nature, "constante") == 0 && 
+                ($3.valeur < 0 || $3.valeur >= sym->array_size)) {
+                printf("Erreur semantique : indice %d hors limites pour '%s' (taille %d) ligne %d\n", 
+                      (int)$3.valeur, $1, sym->array_size, nb_ligne);
+                nombre_erreurs_semantiques++;
+            }
+            char* exprType = NULL;
+            if (strcmp($6.nature, "constante") == 0) exprType = "Int";
+            else if (strcmp($6.nature, "reel") == 0) exprType = "Float";
+            else if (strcmp($6.nature, "idf") == 0) {
+                IdfConstTS* exprSym = rechercherIdfConst($6.nom);
+                if (exprSym) exprType = exprSym->type;
+            }
+            else if (strcmp($6.nature, "expression") == 0) exprType = $6.type;
+            else if (strcmp($6.nature, "chaine") == 0) exprType = "String";
+            if (exprType) {
+                char* arrayType = sym->type;
+                if (strcmp(arrayType, "Int") == 0) {
+                    if (strcmp(exprType, "String") == 0) {
+                        printf("Erreur : chaine -> Int pour '%s' ligne %d\n", $1, nb_ligne);
+                        nombre_erreurs_semantiques++;
+                    }
+                    else if (strcmp(exprType, "Float") == 0) {
+                        printf("Erreur : Float -> Int pour '%s' ligne %d\n",
+                               $1, nb_ligne);
+                        nombre_erreurs_semantiques++;
+                    }
+                }
+                else if (strcmp(arrayType, "Float") == 0 && strcmp(exprType, "String") == 0) {
+                    printf("Erreur : chaine -> Float pour '%s' ligne %d\n", $1, nb_ligne);
+                    nombre_erreurs_semantiques++;
+                }
+            }
         }
     }
 ;
