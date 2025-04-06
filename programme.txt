@@ -1,9 +1,71 @@
-MainPrgm TestSemantique ;
+MainPrgm TestComplet ;
 Var
-  let x : Int ;              
-  @define Const Software : Int = 91 ;      
+    let x: Int ;
+    let y: Int ;
+    let z: Int ;
+
+    let a : Float ;
+    let b : Float ;
+    let tab1, tab2 : [Int ; 10] ;
+    
 BeginPg
 {
-  x := 30 ;                 
+   
+    x := 10 ;
+    y := 20 ;
+    z := x + y ;
+    a := 5.5 ;
+    b := a * 2.0 ;
+    
+    
+    x := (y + z) * 2 / (MAX - 20) ;
+    a := PI * b / 2.0 ;
+    
+    
+    tab1[0] := 1 ;
+    tab1[1] := 2 ;
+    if (x > y) then {
+        z := x - y ;
+        output("x est plus grand que y: ") ;
+    } else {
+        z := y - x ;
+        output("y est plus grand que x: ") ;
+    }
+    if ((x > 5) AND (y < 30)) then {
+        output("Condition complexe vérifiée") ;
+    } else {
+        output("Condition complexe non vérifiée") ;
+    }
+    
+    x := 0 ;
+    do {
+        x := x + 1 ;
+        output("Valeur de x: ") ;
+    } while (x < 5) ;
+    
+    for i from 0 to 9 step 1 {
+        tab1[i] := i * 2 ;
+    }
+    
+    for i from 0 to 5 step 1 {
+        for j from 0 to 5 step 1 {
+            output(i)
+        }
+    }
+    
+    output("Entrez une valeur entière: ") ;
+    input(x) ;
+    output("Vous avez saisi: ") ;
+    
+    z := MAX - MIN ;
+    a := PI * 2.0 ;
+    
+    if (!(x == y)) then {
+        output("x est différent de y") ;
+    }
+    
+    if ((x < 10) OR (y > 15)) then {
+        output("Au moins une des conditions est vraie") ;
+    }
 }
 EndPg ;

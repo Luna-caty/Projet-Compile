@@ -129,7 +129,5 @@ int typesCompatibles(const char* type1, const char* type2)
     if (strcmp(type1, "Float") == 0 && strcmp(type2, "Int") == 0) {
         return 1;
     }
-            
-            
     return 0;
 }
