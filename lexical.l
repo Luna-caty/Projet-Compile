@@ -20,8 +20,8 @@ IDF {lettre}({lettre}|{chiffre}|_)*
 constante [+-]?{chiffre}+
 float [+-]?{chiffre}+\.{chiffre}+
 chaine \"([^\"\\]|\\.)*\"
-commentLigne "<!-"[^!]*"!->"
-commentLignes "{--"(.|\n)*"--}"
+commentLigne "<!-"([^-]|-[^!]|--+[^!>])*"-!>"
+commentLignes "{--"(.|\n)*?"--}"
 
 %%
 

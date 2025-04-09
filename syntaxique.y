@@ -554,64 +554,85 @@ declaration_tableau:
 
 ;
 
+
 liste_idf:
     IDF
     {
-        $$ = $1;
+        $$ = strdup($1);
     }
     | liste_idf vg IDF
     {
-        IdfConstTS* sym = rechercherIdfConst($1);
-        if (sym) {
-            sym->declared = 1;
-        }
-        
-        IdfConstTS* sym3 = rechercherIdfConst($3);
-        if (sym3) {
-            sym3->declared = 1;
-        }
-        
-        $$ = $3;  
+        // Allouer de l'espace pour la concaténation
+        $$ = (char*)malloc(strlen($1) + strlen($3) + 2); // +2 pour la virgule et le null terminator
+        sprintf($$, "%s,%s", $1, $3);
+        free($1); // Libérer l'ancienne mémoire allouée
     }
-;
+    ;
+
+
+
 const_declaration:
     at_sign define Const IDF separ_dec type affect_val constante pvg
     {
+       
         IdfConstTS* sym = rechercherIdfConst($4);
-        if (!sym) {
-            printf("Erreur : identifiant '%s' non trouvé ligne %d\n", $4, nb_ligne);
-            nombre_erreurs_semantiques++;
-        } else if (sym->declared == 1) {
-            printf("Erreur : '%s' déjà déclaré ligne %d\n", $4, nb_ligne);
-            nombre_erreurs_semantiques++;
+        
+        if (sym) {
+          
+            if (sym->declared == 1) {
+                printf("Erreur semantique : identifiant '%s' deja declare a la ligne %d\n", $4, nb_ligne);
+                nombre_erreurs_semantiques++;
+            }
+           
+             else {
+           
+            char buffer[20];
+            sprintf(buffer, "%d", $8); 
+            
+            insererIdfConst($4, "CONST", $6, buffer, 1);
+        }
         }
     }
+
 ;
+
+
+
 declarations: 
     /* vide */ 
     | declaration declarations
     | const_declaration declarations
 ;
 
+
 inOut:
     input_var par_ouv IDF par_fer pvg
     {
         IdfConstTS* sym = rechercherIdfConst($3);
         if (!sym || sym->declared == 0) {
-          printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", $3, nb_ligne);
-          nombre_erreurs_semantiques++;
+            printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", $3, nb_ligne);
+            nombre_erreurs_semantiques++;
+        }
+    }
+    | output_var par_ouv chaine vg IDF par_fer pvg
+    {
+        IdfConstTS* sym = rechercherIdfConst($5);
+        if (!sym || sym->declared == 0) {
+            printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", $5, nb_ligne);
+            nombre_erreurs_semantiques++;
         }
     }
     | output_var par_ouv chaine par_fer pvg
-    {
+    | output_var par_ouv IDF par_fer pvg
+    {   
         IdfConstTS* sym = rechercherIdfConst($3);
         if (!sym || sym->declared == 0) {
-          printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", $3, nb_ligne);
-          nombre_erreurs_semantiques++;
+            printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", $3, nb_ligne);
+            nombre_erreurs_semantiques++;
         }
     }
-
 ;
+
 
 affectation:
     IDF aff expression pvg
@@ -629,12 +650,12 @@ affectation:
                 int erreur_type = 0;
                 float valeur_expr = 0;
                 
-                // Détermination du type et de la valeur de l'expression
+               
                 if (strcmp($3.nature, "constante") == 0) {
                     exprType = "Int";
                     valeur_expr = $3.valeur;
                     if (strcmp(sym->type, "Int") == 0) {
-                        // Vérification des limites pour Int
+                       
                         if (valeur_expr < -32768 || valeur_expr > 32767) {
                             printf("Erreur semantique : la valeur %f est hors limite pour le type Int a la ligne %d\n", 
                                    valeur_expr, nb_ligne);
@@ -654,7 +675,7 @@ affectation:
                         if (strlen(exprSym->value) > 0) {
                             valeur_expr = atof(exprSym->value);
                         }
-                        // Vérification spécifique pour Float -> Int
+                       
                         if (strcmp(sym->type, "Int") == 0 && strcmp(exprType, "Float") == 0 && 
                             strlen(exprSym->value) > 0) {
                             if (valeur_expr != (int)valeur_expr) {
@@ -673,14 +694,14 @@ affectation:
                     erreur_type = (strcmp(sym->type, "Int") == 0 && exprType != NULL && strcmp(exprType, "Float") == 0);
                 }
                 
-                // Vérification unique de compatibilité de types
+                
                 if (erreur_type) {
                     printf("Erreur semantique : incompatibilite de types - affectation d'une expression de type %s a '%s' de type %s a la ligne %d\n", 
                            exprType, $1, sym->type, nb_ligne);
                     nombre_erreurs_semantiques++;
                 }
                 
-                // Mise à jour de la valeur dans la table des symboles
+               
                 if (exprType != NULL && !erreur_type) {
                     char tempValue[20];
                     if (strcmp(sym->type, "Int") == 0) {
@@ -703,7 +724,7 @@ affectation:
             printf("Erreur semantique : '%s' n'est pas un tableau a la ligne %d\n", $1, nb_ligne);
             nombre_erreurs_semantiques++;
         } else {
-            // Vérification de l'indice
+            
             if (strcmp($3.nature, "constante") == 0 && 
                 ($3.valeur < 0 || $3.valeur >= sym->array_size)) {
                 printf("Erreur semantique : indice %d hors limites pour '%s' (taille %d) ligne %d\n", 
@@ -711,7 +732,7 @@ affectation:
                 nombre_erreurs_semantiques++;
             }
             
-            // Vérification du type de l'expression
+            
             char* exprType = NULL;
             if (strcmp($6.nature, "constante") == 0) exprType = "Int";
             else if (strcmp($6.nature, "reel") == 0) exprType = "Float";

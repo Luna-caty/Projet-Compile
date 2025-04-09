@@ -1,71 +1,58 @@
-MainPrgm TestComplet ;
-Var
-    let x: Int ;
-    let y: Int ;
-    let z: Int ;
+MainPrgm Soft_ing ;
 
-    let a : Float ;
-    let b : Float ;
-    let tab1, tab2 : [Int ; 10] ;
-    
+Var
+  let a, b : Int ;
+  let c, p : Float ;
+  let c : Int ;                      
+  let tab1 : [Int ; 5] ;
+  let tab2 : [Float ; 3] ;
+  let i : Int ;                      
+  let m : Int ;                      
+  let tab1 : [Float ; 3] ;                  
+  
+  @define Const n : Int = 3 ;
 BeginPg
 {
+    a := 3.5 ;                      
+    c := 7 ;                         
+    b := "texte" ;                  
+
+    <!-je suis malade-!>
+    
+    con := 2.398 ;   
+    n := 2;               
+    tab1[10] := 12;   
+
+    input(a) ;
+    output("la valeur de a :",f);
+    output(a); 
+
+    if (a > 5) then {       
+        a := 1 ;
+    } else {
+        b := b + 1 ;
+    }
+  
    
-    x := 10 ;
-    y := 20 ;
-    z := x + y ;
-    a := 5.5 ;
-    b := a * 2.0 ;
-    
-    
-    x := (y + z) * 2 / (MAX - 20) ;
-    a := PI * b / 2.0 ;
-    
-    
-    tab1[0] := 1 ;
-    tab1[1] := 2 ;
-    if (x > y) then {
-        z := x - y ;
-        output("x est plus grand que y: ") ;
-    } else {
-        z := y - x ;
-        output("y est plus grand que x: ") ;
+    if (tab2[a] > 5) then {            
+        output("Comparaison invalide") ;
     }
-    if ((x > 5) AND (y < 30)) then {
-        output("Condition complexe vérifiée") ;
-    } else {
-        output("Condition complexe non vérifiée") ;
-    }
-    
-    x := 0 ;
+
     do {
-        x := x + 1 ;
-        output("Valeur de x: ") ;
-    } while (x < 5) ;
-    
-    for i from 0 to 9 step 1 {
-        tab1[i] := i * 2 ;
+       a := 0;        
+    } while (a < 100) ;
+
+    for i from 1 to 5 step 1 {
+        a := a + 1 ;
     }
+    po := 2.5;
+    a := a / 0;
+    a := -10;
     
-    for i from 0 to 5 step 1 {
-        for j from 0 to 5 step 1 {
-            output(i)
-        }
-    }
-    
-    output("Entrez une valeur entière: ") ;
-    input(x) ;
-    output("Vous avez saisi: ") ;
-    
-    z := MAX - MIN ;
-    a := PI * 2.0 ;
-    
-    if (!(x == y)) then {
-        output("x est différent de y") ;
-    }
-    
-    if ((x < 10) OR (y > 15)) then {
-        output("Au moins une des conditions est vraie") ;
-    }
+    {--
+      ceci est un commentai
+      ressur plusieurs lignes
+    --}
+    b := 20 ;
 }
 EndPg ;
