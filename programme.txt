@@ -3,37 +3,47 @@ MainPrgm Soft_ing ;
 Var
   let a, b : Int ;
   let c, p : Float ;
+
+  <!-idf double declaré -!>
   let c : Int ;                      
+  
   let tab1 : [Int ; 5] ;
   let tab2 : [Float ; 3] ;
-  let i : Int ;                      
-  let m : Int ;                      
-  let tab1 : [Float ; 3] ;                  
+  let i,j : Int ;                      
+  let m : Int ;    
+  <!-idf déja declaré -!>                  
+  let tab1 : [Float ; 3] ;    
+  let ttttttttttttttt : Int ;  
+  let test : Int ;  
+  let d : Int ;          
   
   @define Const n : Int = 3 ;
 BeginPg
 {
-    a := 3.5 ;                      
-    c := 7 ;                         
-    b := "texte" ;                  
 
-    <!-je suis malade-!>
+    a := 3.5 ;                      
+    test := -32769 ;
+    c := 8.9 ;   
     
+    
+    output ("con n'est pas declaree");
     con := 2.398 ;   
+    
+    output ("tentative de changement de la valuer d'une constante");
     n := 2;               
+    
+    output ("depassement de la taille du tableau");    
     tab1[10] := 12;   
 
     input(a) ;
-    output("la valeur de a :",f);
-    output(a); 
+
+    output("la valeur de c :",c);
 
     if (a > 5) then {       
         a := 1 ;
     } else {
         b := b + 1 ;
     }
-  
-   
     if (tab2[a] > 5) then {            
         output("Comparaison invalide") ;
     }
@@ -42,17 +52,21 @@ BeginPg
        a := 0;        
     } while (a < 100) ;
 
-    for i from 1 to 5 step 1 {
+    for i from 1 to 5 step 1 
+    {
         a := a + 1 ;
+        for j from 1 to 3 step 1
+        {
+          b := b + 1 ;
+        }
     }
-    po := 2.5;
+    output("division par 0");
     a := a / 0;
     a := -10;
     
-    {--
-      ceci est un commentai
-      ressur plusieurs lignes
-    --}
     b := 20 ;
+    m := 0;
+    output("division par variable de valeur 0");
+    b := b/m ;
 }
 EndPg ;

@@ -517,8 +517,8 @@ static const yytype_uint16 yyrline[] =
        0,    68,    68,    74,    75,    76,    77,    80,    81,    84,
       99,   107,   115,   121,   152,   158,   164,   170,   248,   325,
      401,   439,   446,   453,   459,   466,   472,   478,   486,   490,
-     497,   522,   548,   559,   563,   575,   603,   605,   606,   611,
-     619,   627,   628,   640,   719,   757,   758,   762,   763,   773
+     497,   522,   548,   559,   563,   575,   601,   603,   604,   609,
+     619,   630,   635,   650,   729,   767,   768,   772,   773,   783
 };
 #endif
 
@@ -2162,12 +2162,14 @@ yyreduce:
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 612 "syntaxique.y"
+#line 610 "syntaxique.y"
     {
         IdfConstTS* sym = rechercherIdfConst((yyvsp[(3) - (5)].chaine));
         if (!sym || sym->declared == 0) {
             printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", (yyvsp[(3) - (5)].chaine), nb_ligne);
             nombre_erreurs_semantiques++;
+        } else {
+            // Code pour gérer l'input (si nécessaire)
         }
     ;}
     break;
@@ -2181,19 +2183,35 @@ yyreduce:
         if (!sym || sym->declared == 0) {
             printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", (yyvsp[(5) - (7)].chaine), nb_ligne);
             nombre_erreurs_semantiques++;
+        } else {
+            // Afficher la chaîne et la valeur de l'identifiant
+            printf("%s: %s\n", (yyvsp[(3) - (7)].chaine), sym->value);
         }
+    ;}
+    break;
+
+  case 41:
+
+/* Line 1455 of yacc.c  */
+#line 631 "syntaxique.y"
+    {
+        // Afficher uniquement la chaîne
+        printf("%s\n", (yyvsp[(3) - (5)].chaine));
     ;}
     break;
 
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 629 "syntaxique.y"
+#line 636 "syntaxique.y"
     {   
         IdfConstTS* sym = rechercherIdfConst((yyvsp[(3) - (5)].chaine));
         if (!sym || sym->declared == 0) {
             printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", (yyvsp[(3) - (5)].chaine), nb_ligne);
             nombre_erreurs_semantiques++;
+        } else {
+            // Afficher la valeur de l'identifiant
+            printf("%s\n", sym->value);
         }
     ;}
     break;
@@ -2201,7 +2219,7 @@ yyreduce:
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 641 "syntaxique.y"
+#line 651 "syntaxique.y"
     {
         IdfConstTS* sym = rechercherIdfConst((yyvsp[(1) - (4)].chaine));
         if(!sym || sym->declared == 0) { 
@@ -2285,7 +2303,7 @@ yyreduce:
   case 44:
 
 /* Line 1455 of yacc.c  */
-#line 720 "syntaxique.y"
+#line 730 "syntaxique.y"
     {
         IdfConstTS* sym = rechercherIdfConst((yyvsp[(1) - (7)].chaine));
         if (!sym) {
@@ -2325,7 +2343,7 @@ yyreduce:
   case 48:
 
 /* Line 1455 of yacc.c  */
-#line 764 "syntaxique.y"
+#line 774 "syntaxique.y"
     {
         if ((yyvsp[(4) - (9)].entier) <= 0 || (yyvsp[(6) - (9)].entier) <= 0 || (yyvsp[(8) - (9)].entier) <= 0) {
             printf("Erreur : les bornes et le pas doivent etre positifs (ligne %d)\n", nb_ligne);
@@ -2337,7 +2355,7 @@ yyreduce:
 
 
 /* Line 1455 of yacc.c  */
-#line 2341 "syntaxique.tab.c"
+#line 2359 "syntaxique.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2549,7 +2567,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 776 "syntaxique.y"
+#line 786 "syntaxique.y"
 
 int main ()
 {

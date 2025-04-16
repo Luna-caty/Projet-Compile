@@ -1168,12 +1168,13 @@ case 46:
 YY_RULE_SETUP
 #line 305 "lexical.l"
 { 
-    if (yyleng <= 14)  
-        yylval.chaine = strdup(yytext); 
-    else  
+    if (yyleng > 14) {
         printf("Erreur lexicale : Identificateur trop long '%s' (ligne %d)\n", yytext, nb_ligne);
+    }
     
-    if(!rechercherIdfConst(yytext)) {
+    yylval.chaine = strdup(yytext);
+    
+    if (!rechercherIdfConst(yytext)) {
         // Créer un nouvel identifiant avec declared=0
         IdfConstTS* new = (IdfConstTS*)malloc(sizeof(IdfConstTS));
         strcpy(new->name, yytext);
@@ -1200,7 +1201,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 335 "lexical.l"
+#line 336 "lexical.l"
 { yylval.entier = atoi(yytext);
  if (yylval.entier < -32768 || yylval.entier > 32767) 
     printf("Erreur lexicale : Constante entière hors limites '%s' (ligne %d)\n", yytext, nb_ligne);
@@ -1212,7 +1213,7 @@ if(!rechercherIdfConst(yytext))
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 344 "lexical.l"
+#line 345 "lexical.l"
 { yylval.reel = atof(yytext); return reel; 
 if(!rechercherIdfConst(yytext))
     {
@@ -1224,40 +1225,40 @@ if(!rechercherIdfConst(yytext))
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 352 "lexical.l"
+#line 353 "lexical.l"
 { yylval.chaine = strdup(yytext); return chaine; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 353 "lexical.l"
-{printf("Commentaire sur une seule ligne"); }
+#line 354 "lexical.l"
+
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 354 "lexical.l"
-{printf("Commentaire sur plusieurs lignes");}
+#line 355 "lexical.l"
+
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 356 "lexical.l"
+#line 357 "lexical.l"
 ;
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 358 "lexical.l"
+#line 359 "lexical.l"
 { nb_ligne++; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 360 "lexical.l"
+#line 361 "lexical.l"
 { printf("Erreur lexicale à la ligne %d: caractère inattendu '%s'\n", nb_ligne, yytext); }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 362 "lexical.l"
+#line 363 "lexical.l"
 ECHO;
 	YY_BREAK
-#line 1261 "lex.yy.c"
+#line 1262 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2143,6 +2144,6 @@ int main()
 	return 0;
 	}
 #endif
-#line 362 "lexical.l"
+#line 363 "lexical.l"
 
 

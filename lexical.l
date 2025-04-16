@@ -303,12 +303,13 @@ commentLignes "{--"(.|\n)*?"--}"
 }
 
 {IDF} { 
-    if (yyleng <= 14)  
-        yylval.chaine = strdup(yytext); 
-    else  
+    if (yyleng > 14) {
         printf("Erreur lexicale : Identificateur trop long '%s' (ligne %d)\n", yytext, nb_ligne);
+    }
     
-    if(!rechercherIdfConst(yytext)) {
+    yylval.chaine = strdup(yytext);
+    
+    if (!rechercherIdfConst(yytext)) {
         // Créer un nouvel identifiant avec declared=0
         IdfConstTS* new = (IdfConstTS*)malloc(sizeof(IdfConstTS));
         strcpy(new->name, yytext);
@@ -350,8 +351,8 @@ if(!rechercherIdfConst(yytext))
 
 }
 {chaine} { yylval.chaine = strdup(yytext); return chaine; }
-{commentLigne}  {printf("Commentaire sur une seule ligne"); }
-{commentLignes} {printf("Commentaire sur plusieurs lignes");}
+{commentLigne}  
+{commentLignes} 
 
 [ \t]  ;
 

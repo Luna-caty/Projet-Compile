@@ -95,7 +95,7 @@ void afficher() {
     IdfConstTS* currentIdfConst = listeIdfConst;
     // tant que on est pas arrivé a la fin de la liste 
     while (currentIdfConst != NULL) {
-        printf("| %-11s | %-10s | %-10s | %-10s | %-5d | %-5d |\n", 
+        printf("| %-15s | %-10s | %-10s | %-10s | %-5d | %-5d |\n", 
             // on avvance dans la liste    
             currentIdfConst->name, currentIdfConst->code, currentIdfConst->type, currentIdfConst->value, currentIdfConst->state,currentIdfConst->declared);
         currentIdfConst = currentIdfConst->suiv;

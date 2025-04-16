@@ -612,6 +612,8 @@ inOut:
         if (!sym || sym->declared == 0) {
             printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", $3, nb_ligne);
             nombre_erreurs_semantiques++;
+        } else {
+            // Code pour gérer l'input (si nécessaire)
         }
     }
     | output_var par_ouv chaine vg IDF par_fer pvg
@@ -620,15 +622,25 @@ inOut:
         if (!sym || sym->declared == 0) {
             printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", $5, nb_ligne);
             nombre_erreurs_semantiques++;
+        } else {
+            // Afficher la chaîne et la valeur de l'identifiant
+            printf("%s: %s\n", $3, sym->value);
         }
     }
     | output_var par_ouv chaine par_fer pvg
+    {
+        // Afficher uniquement la chaîne
+        printf("%s\n", $3);
+    }
     | output_var par_ouv IDF par_fer pvg
     {   
         IdfConstTS* sym = rechercherIdfConst($3);
         if (!sym || sym->declared == 0) {
             printf("Erreur semantique : identifiant '%s' non declare a la ligne %d\n", $3, nb_ligne);
             nombre_erreurs_semantiques++;
+        } else {
+            // Afficher la valeur de l'identifiant
+            printf("%s\n", sym->value);
         }
     }
 ;
