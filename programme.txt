@@ -2,7 +2,10 @@ MainPrgm Soft_ing ;
 
 Var
   let a, b : Int ;
-  let c, p : Float ;
+  let c : Float ;
+  let p : Float ;
+
+
 
   <!-idf double declaré -!>
   let c : Int ;                      
@@ -18,19 +21,21 @@ Var
   let d : Int ;          
   
   @define Const n : Int = 3 ;
+  @define Const PI : Float = 3.14 ;
 BeginPg
 {
 
     a := 3.5 ;                      
     test := -32769 ;
     c := 8.9 ;   
-    
+    p := 2;
     
     output ("con n'est pas declaree");
     con := 2.398 ;   
     
     output ("tentative de changement de la valuer d'une constante");
     n := 2;               
+    PI := 4.3;
     
     output ("depassement de la taille du tableau");    
     tab1[10] := 12;   

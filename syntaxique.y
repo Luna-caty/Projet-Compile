@@ -574,26 +574,41 @@ liste_idf:
 const_declaration:
     at_sign define Const IDF separ_dec type affect_val constante pvg
     {
-       
         IdfConstTS* sym = rechercherIdfConst($4);
         
         if (sym) {
-          
             if (sym->declared == 1) {
                 printf("Erreur semantique : identifiant '%s' deja declare a la ligne %d\n", $4, nb_ligne);
                 nombre_erreurs_semantiques++;
+            } else {
+                char buffer[20];
+                sprintf(buffer, "%d", $8);
+                insererIdfConst($4, "CONST", $6, buffer, 1);
             }
-           
-             else {
-           
-            char buffer[20];
-            sprintf(buffer, "%d", $8); 
-            
-            insererIdfConst($4, "CONST", $6, buffer, 1);
-        }
         }
     }
-
+    | at_sign define Const IDF separ_dec type affect_val reel pvg
+    {
+        IdfConstTS* sym = rechercherIdfConst($4);
+        
+        if (sym) {
+            if (sym->declared == 1) {
+                printf("Erreur semantique : identifiant '%s' deja declare a la ligne %d\n", $4, nb_ligne);
+                nombre_erreurs_semantiques++;
+            } else {
+                // Vérification de compatibilité des types
+                if (strcmp($6, "Int") == 0) {
+                    printf("Erreur semantique : incompatibilite de types - affectation d'une valeur reelle a une constante de type Int a la ligne %d\n", nb_ligne);
+                    nombre_erreurs_semantiques++;
+                } else {
+                    // Ajouter cette partie pour insérer la constante réelle
+                    char buffer[20];
+                    sprintf(buffer, "%f", $8);
+                    insererIdfConst($4, "CONST", $6, buffer, 1);
+                }
+            }
+        }
+    }
 ;
 
 
@@ -666,14 +681,6 @@ affectation:
                 if (strcmp($3.nature, "constante") == 0) {
                     exprType = "Int";
                     valeur_expr = $3.valeur;
-                    if (strcmp(sym->type, "Int") == 0) {
-                       
-                        if (valeur_expr < -32768 || valeur_expr > 32767) {
-                            printf("Erreur semantique : la valeur %f est hors limite pour le type Int a la ligne %d\n", 
-                                   valeur_expr, nb_ligne);
-                            nombre_erreurs_semantiques++;
-                        }
-                    }
                 } 
                 else if (strcmp($3.nature, "reel") == 0) {
                     exprType = "Float";
