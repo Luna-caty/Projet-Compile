@@ -743,7 +743,7 @@ affectation:
             printf("Erreur semantique : '%s' n'est pas un tableau a la ligne %d\n", $1, nb_ligne);
             nombre_erreurs_semantiques++;
         } else {
-            
+            // Vérification des indices
             if (strcmp($3.nature, "constante") == 0 && 
                 ($3.valeur < 0 || $3.valeur >= sym->array_size)) {
                 printf("Erreur semantique : indice %d hors limites pour '%s' (taille %d) ligne %d\n", 
@@ -751,18 +751,37 @@ affectation:
                 nombre_erreurs_semantiques++;
             }
             
-            
+            // Vérification des types - plus stricte pour les tableaux
             char* exprType = NULL;
-            if (strcmp($6.nature, "constante") == 0) exprType = "Int";
-            else if (strcmp($6.nature, "reel") == 0) exprType = "Float";
+            int erreur_type = 0;
+            
+            if (strcmp($6.nature, "constante") == 0) {
+                exprType = "Int";
+                // Pour un tableau Int, vérifier que la valeur est entière
+                if (strcmp(sym->type, "Int") == 0 && $6.valeur != (int)$6.valeur) {
+                    erreur_type = 1;
+                }
+            }
+            else if (strcmp($6.nature, "reel") == 0) {
+                exprType = "Float";
+                erreur_type = (strcmp(sym->type, "Int") == 0);
+            }
             else if (strcmp($6.nature, "idf") == 0) {
                 IdfConstTS* exprSym = rechercherIdfConst($6.nom);
-                if (exprSym) exprType = exprSym->type;
+                if (exprSym) {
+                    exprType = exprSym->type;
+                    erreur_type = (strcmp(sym->type, exprType) != 0);
+                }
             }
-            else if (strcmp($6.nature, "expression") == 0) exprType = $6.type;
+            else if (strcmp($6.nature, "expression") == 0) {
+                if ($6.type != NULL) {
+                    exprType = $6.type;
+                    erreur_type = (strcmp(sym->type, exprType) != 0);
+                }
+            }
             
-            if (exprType && !typesCompatibles(sym->type, exprType)) {
-                printf("Erreur semantique : incompatibilite de types - affectation d'une expression de type %s a un element de tableau '%s' de type %s a la ligne %d\n", 
+            if (erreur_type) {
+                printf("Erreur semantique : incompatibilite de types - affectation d'une valeur de type %s a un element de tableau '%s' de type %s a la ligne %d\n", 
                        exprType, $1, sym->type, nb_ligne);
                 nombre_erreurs_semantiques++;
             }

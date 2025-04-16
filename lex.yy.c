@@ -1204,7 +1204,7 @@ YY_RULE_SETUP
 #line 336 "lexical.l"
 { yylval.entier = atoi(yytext);
  if (yylval.entier < -32768 || yylval.entier > 32767) 
-    printf("Erreur lexicale : Constante entière hors limites '%s' (ligne %d)\n", yytext, nb_ligne);
+    printf("Erreur lexicale : Constante entiere hors limites '%s' (ligne %d)\n", yytext, nb_ligne);
 if(!rechercherIdfConst(yytext))
     {
         insererIdfConst(yytext,"constante","int",yytext,1);

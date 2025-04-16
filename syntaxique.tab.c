@@ -520,8 +520,8 @@ static const yytype_uint16 yyrline[] =
       99,   107,   115,   121,   152,   158,   164,   170,   248,   325,
      401,   439,   446,   453,   459,   466,   472,   478,   486,   490,
      497,   522,   548,   559,   563,   575,   590,   616,   618,   619,
-     624,   634,   645,   650,   665,   736,   774,   775,   779,   780,
-     790
+     624,   634,   645,   650,   665,   736,   793,   794,   798,   799,
+     809
 };
 #endif
 
@@ -2331,7 +2331,7 @@ yyreduce:
             printf("Erreur semantique : '%s' n'est pas un tableau a la ligne %d\n", (yyvsp[(1) - (7)].chaine), nb_ligne);
             nombre_erreurs_semantiques++;
         } else {
-            
+            // Vérification des indices
             if (strcmp((yyvsp[(3) - (7)].expr).nature, "constante") == 0 && 
                 ((yyvsp[(3) - (7)].expr).valeur < 0 || (yyvsp[(3) - (7)].expr).valeur >= sym->array_size)) {
                 printf("Erreur semantique : indice %d hors limites pour '%s' (taille %d) ligne %d\n", 
@@ -2339,18 +2339,37 @@ yyreduce:
                 nombre_erreurs_semantiques++;
             }
             
-            
+            // Vérification des types - plus stricte pour les tableaux
             char* exprType = NULL;
-            if (strcmp((yyvsp[(6) - (7)].expr).nature, "constante") == 0) exprType = "Int";
-            else if (strcmp((yyvsp[(6) - (7)].expr).nature, "reel") == 0) exprType = "Float";
+            int erreur_type = 0;
+            
+            if (strcmp((yyvsp[(6) - (7)].expr).nature, "constante") == 0) {
+                exprType = "Int";
+                // Pour un tableau Int, vérifier que la valeur est entière
+                if (strcmp(sym->type, "Int") == 0 && (yyvsp[(6) - (7)].expr).valeur != (int)(yyvsp[(6) - (7)].expr).valeur) {
+                    erreur_type = 1;
+                }
+            }
+            else if (strcmp((yyvsp[(6) - (7)].expr).nature, "reel") == 0) {
+                exprType = "Float";
+                erreur_type = (strcmp(sym->type, "Int") == 0);
+            }
             else if (strcmp((yyvsp[(6) - (7)].expr).nature, "idf") == 0) {
                 IdfConstTS* exprSym = rechercherIdfConst((yyvsp[(6) - (7)].expr).nom);
-                if (exprSym) exprType = exprSym->type;
+                if (exprSym) {
+                    exprType = exprSym->type;
+                    erreur_type = (strcmp(sym->type, exprType) != 0);
+                }
             }
-            else if (strcmp((yyvsp[(6) - (7)].expr).nature, "expression") == 0) exprType = (yyvsp[(6) - (7)].expr).type;
+            else if (strcmp((yyvsp[(6) - (7)].expr).nature, "expression") == 0) {
+                if ((yyvsp[(6) - (7)].expr).type != NULL) {
+                    exprType = (yyvsp[(6) - (7)].expr).type;
+                    erreur_type = (strcmp(sym->type, exprType) != 0);
+                }
+            }
             
-            if (exprType && !typesCompatibles(sym->type, exprType)) {
-                printf("Erreur semantique : incompatibilite de types - affectation d'une expression de type %s a un element de tableau '%s' de type %s a la ligne %d\n", 
+            if (erreur_type) {
+                printf("Erreur semantique : incompatibilite de types - affectation d'une valeur de type %s a un element de tableau '%s' de type %s a la ligne %d\n", 
                        exprType, (yyvsp[(1) - (7)].chaine), sym->type, nb_ligne);
                 nombre_erreurs_semantiques++;
             }
@@ -2361,7 +2380,7 @@ yyreduce:
   case 49:
 
 /* Line 1455 of yacc.c  */
-#line 781 "syntaxique.y"
+#line 800 "syntaxique.y"
     {
         if ((yyvsp[(4) - (9)].entier) <= 0 || (yyvsp[(6) - (9)].entier) <= 0 || (yyvsp[(8) - (9)].entier) <= 0) {
             printf("Erreur : les bornes et le pas doivent etre positifs (ligne %d)\n", nb_ligne);
@@ -2373,7 +2392,7 @@ yyreduce:
 
 
 /* Line 1455 of yacc.c  */
-#line 2377 "syntaxique.tab.c"
+#line 2396 "syntaxique.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2585,7 +2604,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 793 "syntaxique.y"
+#line 812 "syntaxique.y"
 
 int main ()
 {
