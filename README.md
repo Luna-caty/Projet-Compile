@@ -63,7 +63,9 @@ Stockage des informations : nom, type, valeur, code entité, etc.
 Messages d'erreur détaillés avec numéro de ligne et colonne.
 
 ## Compilation et exécution
--Créer un fichier texte avec votre code MiniSoft
--Exécuter le fichier commande.bat
+Créer un fichier texte avec votre code MiniSoft  
+   
+Exécuter le fichier commande.bat
+
 
 
