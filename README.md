@@ -1,6 +1,6 @@
 # Compilateur MiniSoft
 
-Un mini-compilateur pour le langage **MiniSoft** développé avec FLEX et BISON dans le cadre du module Compilation (L3 Software - USTHB).
+Un mini-compilateur pour le langage **MiniSoft** développé avec FLEX et BISON 
 
 ## Description
 
@@ -63,7 +63,7 @@ Stockage des informations : nom, type, valeur, code entité, etc.
 Messages d'erreur détaillés avec numéro de ligne et colonne.
 
 ## Compilation et exécution
-Créer un fichier texte avec votre code MiniSoft
-Exécuter le fichier commande.bat
+-Créer un fichier texte avec votre code MiniSoft
+-Exécuter le fichier commande.bat
 
 
